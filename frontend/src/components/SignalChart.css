@@ -1,0 +1,34 @@
+.signal-card {
+  background: linear-gradient(160deg, #101010 0%, #0b0b0b 100%);
+  border: 1px solid #1e1e1e;
+  border-radius: 14px;
+  padding: 0.85rem 0.75rem 0.65rem;
+}
+
+.signal-title {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+  margin: 0 0 0.35rem 0.25rem;
+}
+
+.signal-legend {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 0.4rem 0.35rem;
+  font-size: 0.68rem;
+}
+
+.leg-buy {
+  color: #00ff88;
+}
+
+.leg-sell {
+  color: #ff6b6b;
+}
+
+.signal-wrap {
+  width: 100%;
+  min-height: 260px;
+}
