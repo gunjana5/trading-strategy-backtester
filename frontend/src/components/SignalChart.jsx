@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import InfoTip from "./InfoTip.jsx";
 import "./SignalChart.css";
 
 // close price plus buy/sell scatter markers (one row per day, nulls when no signal)
@@ -60,7 +61,12 @@ export default function SignalChart({ priceSeries }) {
 
   return (
     <div className="signal-card">
-      <div className="signal-title">price &amp; signals</div>
+      <div className="signal-title">
+        <span className="label-row">
+          price &amp; signals
+          <InfoTip text="price line plus triangles when the strategy said buy or sell" />
+        </span>
+      </div>
       <div className="signal-legend">
         <span className="leg leg-buy">▲ buy</span>
         <span className="leg leg-sell">▼ sell</span>

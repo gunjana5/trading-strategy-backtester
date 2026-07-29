@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fetchTickers } from "../api/client.js";
+import InfoTip from "./InfoTip.jsx";
 import "./StrategySelector.css";
 
 function formatDate(d) {
@@ -9,6 +10,15 @@ function formatDate(d) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+function TipLabel({ children, tip }) {
+  return (
+    <span className="label-row">
+      {children}
+      <InfoTip text={tip} />
+    </span>
+  );
 }
 
 export default function StrategySelector({ onRun, loading, error }) {
@@ -28,6 +38,7 @@ export default function StrategySelector({ onRun, loading, error }) {
   const [slippageBps, setSlippageBps] = useState(5);
   const [maxDrawdownPct, setMaxDrawdownPct] = useState(0);
   const [stopLossPct, setStopLossPct] = useState(0);
+  const [positionSizePct, setPositionSizePct] = useState(100);
   const [loadErr, setLoadErr] = useState(null);
   const [formErr, setFormErr] = useState(null);
 
@@ -62,6 +73,7 @@ export default function StrategySelector({ onRun, loading, error }) {
       slippage_bps: slippageBps,
       max_drawdown_pct: maxDrawdownPct || null,
       stop_loss_pct: stopLossPct || null,
+      position_size_pct: positionSizePct,
     };
     if (strategy === "moving_average_crossover") {
       return { ...base, fast, slow };
@@ -83,6 +95,7 @@ export default function StrategySelector({ onRun, loading, error }) {
     slippageBps,
     maxDrawdownPct,
     stopLossPct,
+    positionSizePct,
   ]);
 
   const handleSubmit = (e) => {
@@ -110,6 +123,7 @@ export default function StrategySelector({ onRun, loading, error }) {
       slippage_bps: slippageBps,
       max_drawdown_pct: maxDrawdownPct || null,
       stop_loss_pct: stopLossPct || null,
+      position_size_pct: positionSizePct,
     });
   };
 
@@ -119,12 +133,14 @@ export default function StrategySelector({ onRun, loading, error }) {
 
   return (
     <form className="strategy-panel" onSubmit={handleSubmit}>
-      <div className="panel-heading">controls</div>
+      <div className="panel-heading">
+        <TipLabel tip="this whole left bit is how you set up a paper run">controls</TipLabel>
+      </div>
 
       {loadErr && <div className="inline-msg warn">tickers: {loadErr}</div>}
 
       <label className="field">
-        <span>ticker</span>
+        <TipLabel tip="which stock or etf to pretend-trade using yahoo history">ticker</TipLabel>
         <select value={ticker} onChange={(e) => setTicker(e.target.value)} disabled={!tickers.length}>
           {tickers.map((t) => (
             <option key={t} value={t}>
@@ -136,17 +152,17 @@ export default function StrategySelector({ onRun, loading, error }) {
 
       <div className="field-row">
         <label className="field">
-          <span>start</span>
+          <TipLabel tip="first day of price history we pull">start</TipLabel>
           <input type="date" value={start} onChange={(e) => setStart(e.target.value)} required />
         </label>
         <label className="field">
-          <span>end</span>
+          <TipLabel tip="last day of price history we pull">end</TipLabel>
           <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} required />
         </label>
       </div>
 
       <label className="field">
-        <span>strategy</span>
+        <TipLabel tip="the rules that decide buy sell or do nothing each day">strategy</TipLabel>
         <select value={strategy} onChange={(e) => setStrategy(e.target.value)}>
           <option value="moving_average_crossover">moving average crossover</option>
           <option value="rsi_strategy">rsi strategy</option>
@@ -157,7 +173,9 @@ export default function StrategySelector({ onRun, loading, error }) {
       {showMa && (
         <div className="slider-block">
           <label className="slider-label">
-            <span>fast period ({fast})</span>
+            <TipLabel tip="short moving average window in days reacts quicker">
+              fast period ({fast})
+            </TipLabel>
             <input
               type="range"
               min={5}
@@ -167,7 +185,9 @@ export default function StrategySelector({ onRun, loading, error }) {
             />
           </label>
           <label className="slider-label">
-            <span>slow period ({slow})</span>
+            <TipLabel tip="long moving average window smoother trend line">
+              slow period ({slow})
+            </TipLabel>
             <input
               type="range"
               min={10}
@@ -182,7 +202,9 @@ export default function StrategySelector({ onRun, loading, error }) {
       {showRsi && (
         <div className="slider-block">
           <label className="slider-label">
-            <span>rsi period ({rsiPeriod})</span>
+            <TipLabel tip="how many days rsi looks back for overbought/oversold">
+              rsi period ({rsiPeriod})
+            </TipLabel>
             <input
               type="range"
               min={2}
@@ -192,7 +214,7 @@ export default function StrategySelector({ onRun, loading, error }) {
             />
           </label>
           <label className="slider-label">
-            <span>overbought ({overbought})</span>
+            <TipLabel tip="rsi above this = maybe sell vibe">overbought ({overbought})</TipLabel>
             <input
               type="range"
               min={55}
@@ -202,7 +224,7 @@ export default function StrategySelector({ onRun, loading, error }) {
             />
           </label>
           <label className="slider-label">
-            <span>oversold ({oversold})</span>
+            <TipLabel tip="rsi below this = maybe buy vibe">oversold ({oversold})</TipLabel>
             <input
               type="range"
               min={5}
@@ -222,11 +244,15 @@ export default function StrategySelector({ onRun, loading, error }) {
               checked={walkForward}
               onChange={(e) => setWalkForward(e.target.checked)}
             />
-            <span>walk-forward validation</span>
+            <TipLabel tip="trains then tests on later chunks so we dont cheat with future data">
+              walk-forward validation
+            </TipLabel>
           </label>
           {walkForward && (
             <label className="slider-label">
-              <span>folds ({nFolds})</span>
+              <TipLabel tip="how many train/test chunks to chop the timeline into">
+                folds ({nFolds})
+              </TipLabel>
               <input
                 type="range"
                 min={2}
@@ -243,10 +269,14 @@ export default function StrategySelector({ onRun, loading, error }) {
         </div>
       )}
 
-      <div className="panel-heading subtle">costs &amp; risk</div>
+      <div className="panel-heading subtle">
+        <TipLabel tip="fees and safety switches so the sim is less fantasy">costs &amp; risk</TipLabel>
+      </div>
       <div className="slider-block">
         <label className="slider-label">
-          <span>commission ({commissionBps} bps)</span>
+          <TipLabel tip="fake broker fee in basis points 100 bps = 1 percent">
+            commission ({commissionBps} bps)
+          </TipLabel>
           <input
             type="range"
             min={0}
@@ -256,7 +286,9 @@ export default function StrategySelector({ onRun, loading, error }) {
           />
         </label>
         <label className="slider-label">
-          <span>slippage ({slippageBps} bps)</span>
+          <TipLabel tip="we worsen the fill a bit so buys cost more sells get less">
+            slippage ({slippageBps} bps)
+          </TipLabel>
           <input
             type="range"
             min={0}
@@ -266,7 +298,9 @@ export default function StrategySelector({ onRun, loading, error }) {
           />
         </label>
         <label className="slider-label">
-          <span>max drawdown halt ({maxDrawdownPct || "off"}%)</span>
+          <TipLabel tip="if portfolio drops this % from its peak we flatten and stop buying">
+            max drawdown halt ({maxDrawdownPct || "off"}%)
+          </TipLabel>
           <input
             type="range"
             min={0}
@@ -276,13 +310,28 @@ export default function StrategySelector({ onRun, loading, error }) {
           />
         </label>
         <label className="slider-label">
-          <span>stop loss ({stopLossPct || "off"}%)</span>
+          <TipLabel tip="auto sell if an open trade is down this % from entry">
+            stop loss ({stopLossPct || "off"}%)
+          </TipLabel>
           <input
             type="range"
             min={0}
             max={40}
             value={stopLossPct}
             onChange={(e) => setStopLossPct(Number(e.target.value))}
+          />
+        </label>
+        <label className="slider-label">
+          <TipLabel tip="how much cash to put into each buy 100 means go all in">
+            position size ({positionSizePct}% of cash)
+          </TipLabel>
+          <input
+            type="range"
+            min={10}
+            max={100}
+            step={5}
+            value={positionSizePct}
+            onChange={(e) => setPositionSizePct(Number(e.target.value))}
           />
         </label>
       </div>
@@ -294,7 +343,10 @@ export default function StrategySelector({ onRun, loading, error }) {
             running…
           </span>
         ) : (
-          "run backtest"
+          <span className="btn-inner">
+            run backtest
+            <InfoTip text="fires the whole paper sim and shows charts metrics and trades on the right" />
+          </span>
         )}
       </button>
 

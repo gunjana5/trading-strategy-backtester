@@ -1,0 +1,134 @@
+.welcome-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.welcome-card {
+  width: min(22rem, 100%);
+  background: #121212;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 1.1rem 1.15rem 1rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.welcome-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
+  color: #e8e8e8;
+  font-weight: 600;
+}
+
+.welcome-body {
+  margin: 0 0 0.9rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #9a9a9a;
+}
+
+.welcome-ok {
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  background: #00ff88;
+  color: #0a0a0a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.site-help-corner {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+}
+
+.site-help-fab {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  border: 1px solid #3a3a3a;
+  background: #141414;
+  color: #8a8a8a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0.85;
+}
+
+.site-help-fab:hover,
+.site-help-fab:focus-visible {
+  opacity: 1;
+  color: #00ff88;
+  border-color: #00ff88;
+  outline: none;
+}
+
+.site-help-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.55rem);
+  width: min(18rem, calc(100vw - 2rem));
+  background: #121212;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  color: #b0b0b0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.site-help-panel p {
+  margin: 0 0 0.55rem;
+}
+
+.site-help-panel ul {
+  margin: 0 0 0.55rem;
+  padding-left: 1.1rem;
+}
+
+.site-help-panel li {
+  margin-bottom: 0.2rem;
+}
+
+.site-help-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+  color: #888;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-help-close {
+  border: none;
+  background: transparent;
+  color: #777;
+  font-size: 0.7rem;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.site-help-close:hover {
+  color: #00ff88;
+}
+
+.site-help-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  color: #666;
+  margin: 0 !important;
+}

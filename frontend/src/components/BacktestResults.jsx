@@ -1,9 +1,11 @@
 // costs toggle: with fees vs fantasy zero-cost on the same signals
 
 import { useState } from "react";
+import InfoTip from "./InfoTip.jsx";
 import PerformanceChart from "./PerformanceChart.jsx";
 import RiskMetrics from "./RiskMetrics.jsx";
 import SignalChart from "./SignalChart.jsx";
+import TradeBlotter from "./TradeBlotter.jsx";
 import "./BacktestResults.css";
 
 export default function BacktestResults({ data }) {
@@ -17,10 +19,16 @@ export default function BacktestResults({ data }) {
     price_series: priceSeries,
     total_return: totalReturn,
     sharpe_ratio: sharpeRatio,
+    sortino_ratio: sortinoRatio,
     max_drawdown: maxDrawdown,
     win_rate: winRate,
+    avg_win_pct: avgWinPct,
+    avg_loss_pct: avgLossPct,
+    time_in_market: timeInMarket,
+    profit_factor: profitFactor,
     num_trades: numTrades,
     total_costs: totalCosts,
+    trades,
     validation,
     oos_window: oosWindow,
     halted,
@@ -28,26 +36,23 @@ export default function BacktestResults({ data }) {
     stop_exits: stopExits,
     commission_bps: commissionBps,
     slippage_bps: slippageBps,
+    position_size_pct: positionSizePct,
     run_id: runId,
     zero_cost: zeroCost,
   } = data;
 
-  // headline metrics stay "with costs" - zero-cost is the overlay / comparison only
-  const metrics = {
-    totalReturn,
-    sharpeRatio,
-    maxDrawdown,
-    winRate,
-    numTrades,
-    totalCosts,
-  };
-
   return (
     <section className="results-root fade-in">
       <div className="results-head">
-        <span className="pill">results{runId != null ? ` · run #${runId}` : ""}</span>
+        <span className="pill">
+          <span className="label-row">
+            results{runId != null ? ` · run #${runId}` : ""}
+            <InfoTip text="output of the last paper run you kicked off or reopened" />
+          </span>
+        </span>
         <span className="subtle">
-          paper only · costs {commissionBps ?? 0}/{slippageBps ?? 0} bps · signals use past rows only
+          paper only · costs {commissionBps ?? 0}/{slippageBps ?? 0} bps · size{" "}
+          {positionSizePct ?? 100}% · signals use past rows only
         </span>
       </div>
 
@@ -117,8 +122,9 @@ export default function BacktestResults({ data }) {
           checked={showZeroCost}
           onChange={(e) => setShowZeroCost(e.target.checked)}
         />
-        <span>
+        <span className="label-row">
           show zero-cost overlay
+          <InfoTip text="draws a fantasy curve with fees set to zero so you can see if costs ate the edge" />
           {zeroCost != null && (
             <em>
               {" "}
@@ -129,12 +135,17 @@ export default function BacktestResults({ data }) {
       </label>
 
       <RiskMetrics
-        totalReturn={metrics.totalReturn}
-        sharpeRatio={metrics.sharpeRatio}
-        maxDrawdown={metrics.maxDrawdown}
-        winRate={metrics.winRate}
-        numTrades={metrics.numTrades}
-        totalCosts={metrics.totalCosts}
+        totalReturn={totalReturn}
+        sharpeRatio={sharpeRatio}
+        sortinoRatio={sortinoRatio}
+        maxDrawdown={maxDrawdown}
+        winRate={winRate}
+        avgWinPct={avgWinPct}
+        avgLossPct={avgLossPct}
+        timeInMarket={timeInMarket}
+        profitFactor={profitFactor}
+        numTrades={numTrades}
+        totalCosts={totalCosts}
       />
       <div className="charts-stack">
         <PerformanceChart
@@ -156,6 +167,7 @@ export default function BacktestResults({ data }) {
         />
         <SignalChart priceSeries={priceSeries} />
       </div>
+      <TradeBlotter trades={trades} />
     </section>
   );
 }

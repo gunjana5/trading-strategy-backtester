@@ -35,7 +35,7 @@ every backtest run does the same dance:
    same contract: dataframe + signal column. 1 = buy, -1 = sell, 0 = hold. keeps the engine reusable
 
 3. backtester/engine.py
-   day by day, long-only. on 1 deploy cash at close (worse fill via slippage_bps), pay commission_bps on notional. on -1 flatten. optional stop_loss_pct force-exits an open position; max_drawdown_pct flattens + halts new entries. metrics: total return %, sharpe (ann ret / ann vol from daily equity returns, 252), max dd from rolling peak, win rate from closed round-trips, total_costs = sum of commissions (slippage is in the fill, not that line)
+   day by day, long-only. on 1 deploy position_size_pct of cash at close (worse fill via slippage_bps), pay commission_bps on notional. on -1 flatten. optional stop_loss_pct force-exits an open position; max_drawdown_pct flattens + halts new entries. metrics: total return %, sharpe + sortino, max dd, win rate, avg win/loss %, time-in-market, profit factor, total_costs. closed trades go into a blotter list (entry/exit/pnl/reason/fees)
 
 4. data/run_store.py
    every successful POST /api/backtest saves metrics + equity + buy-hold + meta into backtest_runs.db. GET /api/runs lists newest first; GET /api/runs/<id> reloads curves for the history panel
@@ -65,18 +65,18 @@ expanding window: fold k trains on [0 .. test_start), predicts the next block. n
 
 costs (defaults 5/5 bps)
 
-commission_bps on each buy/sell notional. slippage_bps makes buy fill higher and sell fill lower vs close. buy-hold benchmark uses the same entry cost model so the chart isn't free-vs-paid nonsense. ui can also send max_drawdown_pct / stop_loss_pct (0 = off)
+commission_bps on each buy/sell notional. slippage_bps makes buy fill higher and sell fill lower vs close. buy-hold benchmark uses the same entry cost model so the chart isn't free-vs-paid nonsense. ui can also send max_drawdown_pct / stop_loss_pct (0 = off) and position_size_pct (default 100 = all deployable cash on that signal)
 
 
 frontend bits worth remembering
 
 StrategySelector - default dates = two years back → today; fetches tickers once with a cancelled flag. client-side checks (fast < slow, oversold < overbought, dates) before hitting the api. costs + walk-forward toggles live here
 
-BacktestResults - snake_case api → camelCase props; honesty / halt banners; "show zero-cost overlay" checkbox. headline metrics stay with-costs; yellow curve is the free-fill fantasy
+BacktestResults - snake_case api → camelCase props; honesty / halt banners; "show zero-cost overlay" checkbox. headline metrics stay with-costs; yellow curve is the free-fill fantasy; TradeBlotter under the charts
 
 PerformanceChart - OOS badge + reference line at oos_start when ml validation is present. train bars shaded lightly so interviewers can see we don't trade the train set
 
-RunHistory - GET /api/runs, click row → GET /api/runs/:id, parent swaps results. historyKey bumps after a new run so the list refreshes
+RunHistory - GET /api/runs, click row → GET /api/runs/:id, parent swaps results (incl trades + extra metrics from meta). historyKey bumps after a new run so the list refreshes
 
 sqlite not postgres - on purpose. one person demo. say that if someone asks "why not postgres"
 
@@ -93,15 +93,16 @@ ml needs enough history after warm-up
 
 stuff i'd still come back to
 
-position sizing / shorts (engine is all-in long-only)
+shorts / multi-ticker portfolio (engine is still long-only)
 fatter cost model (impact, borrow) if i ever pretend this is serious
 production: npm run build doesn't get the vite proxy - need VITE_API_URL or one reverse proxy
 lazy-load recharts if bundle size ever mattered
+# done: position sizing %, trade blotter, sortino / exposure-ish metrics, ./run.sh
 
 
 quick mental map
 
-fetch_ohlcv (+ cache) → strategy signal → engine (costs/risk) → run_store → json
+fetch_ohlcv (+ cache) → strategy signal → engine (costs/risk/sizing) → run_store → json
 app.py thin · App.jsx state · client.js fetch · vite proxy → :5050
 
 that's the loop when reopening this repo

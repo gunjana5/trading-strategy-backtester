@@ -1,0 +1,65 @@
+.blotter {
+  margin-top: 1rem;
+  border: 1px solid #222;
+  border-radius: 12px;
+  background: #0e0e0e;
+  overflow: hidden;
+}
+
+.blotter-head {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6f6f6f;
+  padding: 0.75rem 0.9rem 0.4rem;
+}
+
+.blotter-empty {
+  margin: 0;
+  padding: 0.4rem 0.9rem 0.9rem;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.blotter-scroll {
+  overflow-x: auto;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.blotter-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.blotter-table th,
+.blotter-table td {
+  text-align: left;
+  padding: 0.45rem 0.75rem;
+  border-top: 1px solid #1a1a1a;
+  white-space: nowrap;
+}
+
+.blotter-table th {
+  color: #6f6f6f;
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  background: #0e0e0e;
+}
+
+.blotter-table td.tone-good {
+  color: #00ff88;
+}
+
+.blotter-table td.tone-bad {
+  color: #ff6b6b;
+}
+
+.blotter-table td.tone-neutral {
+  color: #d8d8d8;
+}

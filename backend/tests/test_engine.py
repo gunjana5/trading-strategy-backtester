@@ -80,3 +80,36 @@ def test_max_drawdown_halts_new_entries():
     result = backtest(df, initial_capital=1000, max_drawdown_pct=20)
     assert result["halted"] is True
     assert result["halt_reason"] == "max_drawdown"
+
+
+def test_trade_blotter_records_closed_round_trip():
+    df = _series([100, 105, 110], [1, 0, -1])
+    result = backtest(df, initial_capital=1000)
+    assert len(result["trades"]) == 1
+    t = result["trades"][0]
+    assert t["entry_date"] == "2024-01-01"
+    assert t["exit_date"] == "2024-01-03"
+    assert t["reason"] == "signal"
+    assert t["pnl_pct"] > 0
+
+
+def test_position_size_leaves_residual_cash():
+    # buy signal only - 50% of cash should remain after entry
+    df = _series([100, 101, 102], [1, 0, 0])
+    result = backtest(df, initial_capital=1000, position_size_pct=50)
+    assert result["final_shares"] > 0
+    assert result["final_cash"] > 400
+    assert abs(result["final_cash"] - 500) < 1.0
+
+
+def test_sortino_present_with_downside():
+    # up then down so equity has negative daily returns
+    df = _series([100, 120, 90, 95], [1, 0, 0, -1])
+    result = backtest(df, initial_capital=1000)
+    assert "sortino_ratio" in result
+    assert result["sortino_ratio"] == result["sortino_ratio"]  # not nan
+    assert abs(result["sortino_ratio"]) < 1e6
+    assert result["time_in_market"] > 0
+    assert "avg_win_pct" in result
+    assert "avg_loss_pct" in result
+    assert "profit_factor" in result

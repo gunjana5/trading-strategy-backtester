@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import InfoTip from "./InfoTip.jsx";
 import "./PerformanceChart.css";
 
 function mergeCurves(equityCurve, buyHoldCurve, zeroEquity) {
@@ -50,11 +51,17 @@ export default function PerformanceChart({
   return (
     <div className="chart-card">
       <div className="chart-title-row">
-        <div className="chart-title">equity vs buy &amp; hold</div>
+        <div className="chart-title">
+          <span className="label-row">
+            equity vs buy &amp; hold
+            <InfoTip text="green is your strategy grey is buy once and sit yellow is fantasy zero fees if you toggled it" />
+          </span>
+        </div>
         {oosWindow && (
           <span className="oos-badge" title={oosWindow.label}>
             OOS only
             {oosStart ? ` · from ${oosStart}` : ""}
+            <InfoTip text="out of sample only means we didnt trade the training bit for ml" />
           </span>
         )}
       </div>

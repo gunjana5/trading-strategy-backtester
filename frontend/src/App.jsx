@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { runBacktest } from "./api/client.js";
 import BacktestResults from "./components/BacktestResults.jsx";
 import RunHistory from "./components/RunHistory.jsx";
+import SiteHelp from "./components/SiteHelp.jsx";
 import StrategySelector from "./components/StrategySelector.jsx";
 import "./App.css";
 
@@ -30,6 +31,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <SiteHelp />
       <aside className="sidebar">
         <header className="brand">
           <div className="brand-lockup">
@@ -39,7 +41,8 @@ export default function App() {
           <span className="brand-cursor" aria-hidden />
         </header>
         <p className="tagline">
-          paper runs · yahoo history · costs, risk limits, walk-forward honesty
+          paper runs · yahoo history · costs, risk limits, walk-forward honesty · click any ? for
+          help
         </p>
         <StrategySelector onRun={handleRun} loading={loading} error={error} />
         <RunHistory onSelect={setResults} refreshKey={historyKey} />
@@ -52,7 +55,8 @@ export default function App() {
                 <div className="empty-title">run a backtest</div>
                 <p className="empty-body">
                   choose ticker and dates, set costs / risk, pick a strategy, press run. ml uses
-                  hold-out or walk-forward so in-sample bars are not traded.
+                  hold-out or walk-forward so in-sample bars are not traded. poke the little ? icons
+                  if a word looks weird or open the ? in the bottom right for the full site tour
                 </p>
                 <div className="empty-dots">
                   <span />

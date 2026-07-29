@@ -70,6 +70,7 @@ def _cost_risk_from_body(body: dict) -> dict:
         "max_drawdown_pct": (float(pick("max_drawdown_pct", 0)) or None),
         "stop_loss_pct": (float(pick("stop_loss_pct", 0)) or None),
         "initial_capital": float(pick("initial_capital", 10000)),
+        "position_size_pct": float(pick("position_size_pct", 100)),
     }
 
 
@@ -113,6 +114,7 @@ def _simulate(df, costs):
         slippage_bps=costs["slippage_bps"],
         max_drawdown_pct=costs["max_drawdown_pct"],
         stop_loss_pct=costs["stop_loss_pct"],
+        position_size_pct=costs.get("position_size_pct", 100),
     )
     bh = buy_hold_curve(
         df,
@@ -177,6 +179,8 @@ def api_backtest():
             costs["max_drawdown_pct"] = None
         if costs["stop_loss_pct"] is not None and costs["stop_loss_pct"] <= 0:
             costs["stop_loss_pct"] = None
+        if costs["position_size_pct"] <= 0 or costs["position_size_pct"] > 100:
+            return jsonify({"error": "position_size_pct must be between 0 and 100"}), 400
 
         df = fetch_ohlcv(ticker, start, end)
         df, validation = _apply_strategy(df, sk, params)
@@ -199,6 +203,7 @@ def api_backtest():
             "max_drawdown_pct": costs["max_drawdown_pct"],
             "stop_loss_pct": costs["stop_loss_pct"],
             "initial_capital": costs["initial_capital"],
+            "position_size_pct": costs["position_size_pct"],
         }
         meta = {
             "validation": validation,
@@ -207,6 +212,7 @@ def api_backtest():
                 "commission_bps": costs["commission_bps"],
                 "slippage_bps": costs["slippage_bps"],
                 "total_costs": bt.get("total_costs", 0),
+                "position_size_pct": costs["position_size_pct"],
             },
             "risk": {
                 "max_drawdown_pct": costs["max_drawdown_pct"],
@@ -214,6 +220,14 @@ def api_backtest():
                 "halted": bt.get("halted", False),
                 "halt_reason": bt.get("halt_reason"),
                 "stop_exits": bt.get("stop_exits", 0),
+            },
+            "trades": bt.get("trades") or [],
+            "metrics_extra": {
+                "sortino_ratio": bt.get("sortino_ratio"),
+                "avg_win_pct": bt.get("avg_win_pct"),
+                "avg_loss_pct": bt.get("avg_loss_pct"),
+                "time_in_market": bt.get("time_in_market"),
+                "profit_factor": bt.get("profit_factor"),
             },
             "storage": (
                 "sqlite run history on purpose - fine for a single-user demo. "
@@ -255,15 +269,22 @@ def api_backtest():
             "price_series": series,
             "total_return": bt["total_return"],
             "sharpe_ratio": bt["sharpe_ratio"],
+            "sortino_ratio": bt.get("sortino_ratio"),
             "max_drawdown": bt["max_drawdown"],
             "win_rate": bt["win_rate"],
+            "avg_win_pct": bt.get("avg_win_pct"),
+            "avg_loss_pct": bt.get("avg_loss_pct"),
+            "time_in_market": bt.get("time_in_market"),
+            "profit_factor": bt.get("profit_factor"),
             "num_trades": bt["num_trades"],
             "total_costs": bt.get("total_costs", 0),
             "commission_bps": bt.get("commission_bps", 0),
             "slippage_bps": bt.get("slippage_bps", 0),
+            "position_size_pct": bt.get("position_size_pct", 100),
             "halted": bt.get("halted", False),
             "halt_reason": bt.get("halt_reason"),
             "stop_exits": bt.get("stop_exits", 0),
+            "trades": bt.get("trades") or [],
             "validation": validation,
             "oos_window": oos,
             "meta": meta,
