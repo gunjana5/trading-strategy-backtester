@@ -31,6 +31,7 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     out["price_change_1d"] = out["close"].pct_change()
     out["price_change_5d"] = out["close"].pct_change(5)
     next_ret = out["close"].pct_change().shift(-1)
+    # next day up >0.5% counts as "up" - arbitrary but keeps labels less noisy
     out["label"] = (next_ret > 0.005).astype(float)
     out.loc[next_ret.isna(), "label"] = np.nan
     return out

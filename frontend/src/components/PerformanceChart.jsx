@@ -15,6 +15,7 @@ import InfoTip from "./InfoTip.jsx";
 import "./PerformanceChart.css";
 
 function mergeCurves(equityCurve, buyHoldCurve, zeroEquity) {
+  // align buy&hold + optional zero-cost series onto the strategy dates
   const bhMap = new Map((buyHoldCurve || []).map((x) => [x.date, x.value]));
   const zMap = new Map((zeroEquity || []).map((x) => [x.date, x.value]));
   return (equityCurve || []).map((row) => ({

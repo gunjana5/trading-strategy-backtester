@@ -1,3 +1,4 @@
+/* tiny ? popover - resets uppercase from parent labels */
 .info-tip {
   position: relative;
   display: inline-flex;
@@ -54,6 +55,7 @@
 }
 
 .info-tip.align-right .info-tip-pop {
+  /* flip when the tip sits near the right edge */
   left: auto;
   right: 0;
 }

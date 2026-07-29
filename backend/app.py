@@ -38,6 +38,7 @@ TICKERS = [
 
 
 def _normalize_strategy(name):
+    # frontend sends long names; engine keys are short (ma/rsi/ml)
     if not name:
         return None
     s = str(name).lower().strip().replace(" ", "_").replace("-", "_")
@@ -55,6 +56,7 @@ def _normalize_strategy(name):
 
 
 def _cost_risk_from_body(body: dict) -> dict:
+    # costs can sit top-level or inside params - accept both so the ui stays flexible
     params = body.get("params") or {}
 
     def pick(key, default):

@@ -1,3 +1,4 @@
+/* left controls panel - sliders + run button */
 .strategy-panel {
   position: relative;
   z-index: 1;
@@ -115,6 +116,7 @@
 }
 
 .spinner {
+  /* little ring while the backtest request is in flight */
   width: 14px;
   height: 14px;
   border: 2px solid rgba(11, 18, 32, 0.25);

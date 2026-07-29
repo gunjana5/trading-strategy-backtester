@@ -1,3 +1,5 @@
+// closed trades table - one row per round trip
+
 import InfoTip from "./InfoTip.jsx";
 import "./TradeBlotter.css";
 

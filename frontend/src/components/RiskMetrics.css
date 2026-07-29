@@ -1,3 +1,4 @@
+/* metric tiles - tone-* paints the number mint/coral/ice */
 .risk-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));

@@ -1,3 +1,4 @@
+# so pytest can import backtester / strategies without installing the package
 import sys
 from pathlib import Path
 

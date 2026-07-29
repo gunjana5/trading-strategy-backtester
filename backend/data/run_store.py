@@ -122,7 +122,7 @@ def list_runs(
     ticker: str | None = None,
     strategy: str | None = None,
 ) -> list[dict]:
-    limit = max(1, min(limit, 100))
+    limit = max(1, min(limit, 100))  # hard cap so the sidebar never blows up
     clauses = []
     args: list = []
     if ticker:

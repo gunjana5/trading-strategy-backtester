@@ -260,6 +260,7 @@ def buy_hold_curve(df, initial_capital=10000, commission_bps=0.0, slippage_bps=0
     first = prices.iloc[0]
     if first <= 0 or np.isnan(first):
         raise ValueError("invalid first close for buy and hold")
+    # buy once - spendable after commission, fill worsened by slippage
     fill = first * (1.0 + slippage_bps / 10_000.0)
     fee = initial_capital * (commission_bps / 10_000.0)
     spendable = initial_capital - fee

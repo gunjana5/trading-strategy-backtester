@@ -13,6 +13,7 @@ def fetch_ohlcv(ticker, start, end):
         return cached
 
     t = ticker.strip().upper()
+    # progress=False or yfinance spam fills the flask logs
     raw = yf.download(t, start=start, end=end, progress=False, auto_adjust=False)
     if raw is None or raw.empty:
         raise ValueError(f"no data returned for {t} between {start} and {end}")

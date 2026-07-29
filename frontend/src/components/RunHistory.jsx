@@ -1,3 +1,5 @@
+// sqlite history from /api/runs - click to reload charts
+
 import { useCallback, useEffect, useState } from "react";
 import { fetchRun, fetchRuns } from "../api/client.js";
 import InfoTip from "./InfoTip.jsx";
@@ -33,11 +35,12 @@ export default function RunHistory({ onSelect, refreshKey }) {
         setError("this older run has no stored equity curve - re-run to refresh history");
         return;
       }
+      // reshape sqlite row into the same shape as a fresh /api/backtest response
       onSelect?.({
         run_id: row.id,
         equity_curve: row.equity_curve,
         buy_hold_curve: row.buy_hold_curve || [],
-        price_series: [],
+        price_series: [], // not stored - signal chart stays empty on reopen
         total_return: row.total_return,
         sharpe_ratio: row.sharpe_ratio,
         sortino_ratio: row.meta?.metrics_extra?.sortino_ratio,

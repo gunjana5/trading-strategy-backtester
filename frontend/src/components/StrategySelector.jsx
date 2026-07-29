@@ -63,7 +63,7 @@ export default function StrategySelector({ onRun, loading, error }) {
         if (!cancelled) setLoadErr(e.message);
       });
     return () => {
-      cancelled = true;
+      cancelled = true; // ignore late responses after unmount
     };
   }, []);
 

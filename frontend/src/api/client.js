@@ -1,3 +1,4 @@
+// empty BASE = relative /api and vite proxy; set VITE_API_URL if hitting flask directly
 const BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 function apiUrl(path) {
@@ -21,6 +22,7 @@ async function parseJson(res) {
 }
 
 function wrapNetworkError(err) {
+  // browsers throw TypeError when fetch can't connect at all
   if (err instanceof TypeError || err?.name === "TypeError") {
     const hint =
       "cannot reach the api. start the backend first: cd backend && source .venv/bin/activate && python app.py (listening on port 5050).";

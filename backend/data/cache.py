@@ -39,6 +39,7 @@ def get_cached_ohlcv(ticker: str, start: str, end: str) -> pd.DataFrame | None:
     if not row:
         return None
     fetched_at = datetime.fromisoformat(row[0])
+    # expired → caller hits yahoo again
     if datetime.now(timezone.utc) - fetched_at.replace(tzinfo=timezone.utc) > _TTL:
         return None
     payload = json.loads(row[1])

@@ -1,3 +1,5 @@
+# synthetic ohlcv so ml tests stay offline
+
 import numpy as np
 import pandas as pd
 
@@ -5,6 +7,7 @@ from backtester.walk_forward import run_single_split, run_walk_forward
 
 
 def _ohlcv(n=200, seed=0):
+    # random walk close - just enough bars for features + folds
     rng = np.random.default_rng(seed)
     idx = pd.date_range("2020-01-01", periods=n, freq="B")
     close = 100 + np.cumsum(rng.normal(0, 1, size=n))

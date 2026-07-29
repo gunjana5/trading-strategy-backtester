@@ -10,6 +10,7 @@ export default function InfoTip({ text, align = "left" }) {
 
   useEffect(() => {
     if (!open) return undefined;
+    // click outside or escape closes the popover
     const onPointer = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };

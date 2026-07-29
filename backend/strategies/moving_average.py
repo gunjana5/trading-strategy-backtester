@@ -16,9 +16,9 @@ def run(df, fast=20, slow=50):
             sig[i] = 0
             continue
         if f[i] > s[i] and f[i - 1] <= s[i - 1]:
-            sig[i] = 1
+            sig[i] = 1  # cross up
         elif f[i] < s[i] and f[i - 1] >= s[i - 1]:
-            sig[i] = -1
+            sig[i] = -1  # cross down → flatten in the engine
         else:
             sig[i] = 0
     out["signal"] = sig

@@ -1,3 +1,5 @@
+// metric tiles - numbers ease in so the board feels less dead
+
 import { useEffect, useState } from "react";
 import InfoTip from "./InfoTip.jsx";
 import "./RiskMetrics.css";
@@ -10,6 +12,7 @@ function useAnimatedScalar(target, durationMs = 1000) {
     const from = 0;
     const animate = (now) => {
       const t = Math.min(1, (now - start) / durationMs);
+      // ease-out cubic - snappy at the end
       const eased = 1 - (1 - t) ** 3;
       setV(from + (target - from) * eased);
       if (t < 1 && !cancelled) requestAnimationFrame(animate);

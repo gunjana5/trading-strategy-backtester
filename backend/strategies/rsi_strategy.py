@@ -12,7 +12,7 @@ def run(df, period=14, overbought=70, oversold=30):
     sig = []
     for v in rsi_series:
         if pd.isna(v):
-            sig.append(0)
+            sig.append(0)  # warmup bars before rsi exists
         elif v < oversold:
             sig.append(1)
         elif v > overbought:

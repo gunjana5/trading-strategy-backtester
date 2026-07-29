@@ -20,7 +20,7 @@ export default function App() {
     try {
       const data = await runBacktest(config);
       setResults(data);
-      setHistoryKey((k) => k + 1);
+      setHistoryKey((k) => k + 1); // nudge RunHistory to refetch
     } catch (e) {
       setResults(null);
       setError(e?.message || "backtest failed");

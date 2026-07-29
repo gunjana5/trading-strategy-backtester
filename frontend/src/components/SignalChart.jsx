@@ -14,6 +14,7 @@ import "./SignalChart.css";
 // close price plus buy/sell scatter markers (one row per day, nulls when no signal)
 
 function BuyTriangle(props) {
+  // recharts scatter shape - mint up-triangle
   const { cx, cy } = props;
   if (cx == null || cy == null) return null;
   return (

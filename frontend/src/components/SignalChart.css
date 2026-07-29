@@ -1,3 +1,4 @@
+/* price chart card - mint buy / coral sell legend */
 .signal-card {
   background: linear-gradient(165deg, var(--panel) 0%, var(--slate) 100%);
   border: 1.5px solid var(--line);

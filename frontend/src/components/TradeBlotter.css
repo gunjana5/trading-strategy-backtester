@@ -1,3 +1,4 @@
+/* trade blotter table - scroll if lots of round trips */
 .blotter {
   margin-top: 1rem;
   border: 1.5px solid var(--line);

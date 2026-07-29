@@ -4,6 +4,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
 cleanup() {
+  # kill both children when we exit / ctrl+c
   kill "$BACKEND_PID" "$FRONT_PID" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM

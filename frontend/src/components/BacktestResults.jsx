@@ -157,6 +157,7 @@ export default function BacktestResults({ data }) {
             oosWindow ||
             (validation?.folds?.[0]
               ? {
+                  // rebuild a rough window if the api only sent folds
                   oos_start: validation.folds[0].test_start,
                   train_end: validation.folds[0].train_end,
                   oos_end: validation.folds[validation.folds.length - 1].test_end,

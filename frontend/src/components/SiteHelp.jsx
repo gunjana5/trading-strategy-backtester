@@ -15,6 +15,7 @@ export default function SiteHelp() {
 
   useEffect(() => {
     try {
+      // only show the welcome once per browser
       if (!localStorage.getItem(WELCOME_KEY)) setWelcome(true);
     } catch {
       setWelcome(true);

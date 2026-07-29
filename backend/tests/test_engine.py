@@ -1,3 +1,5 @@
+# toy price/signal frames - no yahoo needed
+
 import pandas as pd
 
 from backtester.engine import backtest, buy_hold_curve
