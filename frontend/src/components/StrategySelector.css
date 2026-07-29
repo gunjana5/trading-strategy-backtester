@@ -109,6 +109,27 @@
   cursor: not-allowed;
 }
 
+.compare-btn {
+  margin-top: 0.15rem;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid var(--ice);
+  background: transparent;
+  color: var(--ice);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.compare-btn:hover:not(:disabled) {
+  background: rgba(158, 201, 255, 0.1);
+}
+
+.compare-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .btn-inner {
   display: inline-flex;
   align-items: center;

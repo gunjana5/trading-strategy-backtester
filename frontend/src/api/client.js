@@ -80,3 +80,29 @@ export async function fetchRun(runId) {
     wrapNetworkError(e);
   }
 }
+
+export async function runCompare(config) {
+  try {
+    const res = await fetch(apiUrl("/api/compare"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(config),
+    });
+    return await parseJson(res);
+  } catch (e) {
+    wrapNetworkError(e);
+  }
+}
+
+export async function saveRunNote(runId, note) {
+  try {
+    const res = await fetch(apiUrl(`/api/runs/${runId}/note`), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note }),
+    });
+    return await parseJson(res);
+  } catch (e) {
+    wrapNetworkError(e);
+  }
+}

@@ -61,6 +61,8 @@ export default function RunHistory({ onSelect, refreshKey }) {
         commission_bps: row.params?.commission_bps,
         slippage_bps: row.params?.slippage_bps,
         position_size_pct: row.params?.position_size_pct ?? row.meta?.costs?.position_size_pct,
+        desk_note: row.meta?.desk_note || "",
+        meta: row.meta || {},
       });
     } catch (e) {
       setError(e?.message || "could not open run");

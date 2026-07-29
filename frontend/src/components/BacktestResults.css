@@ -124,3 +124,19 @@
   color: var(--quiet);
   font-style: normal;
 }
+
+.export-btn {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}

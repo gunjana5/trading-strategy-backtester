@@ -1,6 +1,8 @@
 // costs toggle: with fees vs fantasy zero-cost on the same signals
 
 import { useState } from "react";
+import { downloadRunCsv } from "../lib/exportCsv.js";
+import DeskNote from "./DeskNote.jsx";
 import InfoTip from "./InfoTip.jsx";
 import PerformanceChart from "./PerformanceChart.jsx";
 import RiskMetrics from "./RiskMetrics.jsx";
@@ -39,7 +41,11 @@ export default function BacktestResults({ data }) {
     position_size_pct: positionSizePct,
     run_id: runId,
     zero_cost: zeroCost,
+    desk_note: deskNote,
+    meta,
   } = data;
+
+  const note = deskNote || meta?.desk_note || "";
 
   return (
     <section className="results-root fade-in">
@@ -54,6 +60,16 @@ export default function BacktestResults({ data }) {
           paper only · costs {commissionBps ?? 0}/{slippageBps ?? 0} bps · size{" "}
           {positionSizePct ?? 100}% · signals use past rows only
         </span>
+        <button
+          type="button"
+          className="export-btn"
+          onClick={() => downloadRunCsv(data)}
+        >
+          <span className="label-row">
+            export csv
+            <InfoTip text="downloads metrics plus the trade list as a csv file" />
+          </span>
+        </button>
       </div>
 
       {validation && (
@@ -169,6 +185,7 @@ export default function BacktestResults({ data }) {
         <SignalChart priceSeries={priceSeries} />
       </div>
       <TradeBlotter trades={trades} />
+      <DeskNote runId={runId} initialNote={note} />
     </section>
   );
 }

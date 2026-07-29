@@ -72,11 +72,13 @@ frontend bits worth remembering
 
 StrategySelector - default dates = two years back → today; fetches tickers once with a cancelled flag. client-side checks (fast < slow, oversold < overbought, dates) before hitting the api. costs + walk-forward toggles live here
 
-BacktestResults - snake_case api → camelCase props; honesty / halt banners; "show zero-cost overlay" checkbox. headline metrics stay with-costs; yellow curve is the free-fill fantasy; TradeBlotter under the charts
+BacktestResults - snake_case api → camelCase props; honesty / halt banners; zero-cost overlay; TradeBlotter; desk note; csv export
+
+CompareTable - POST /api/compare - ma/rsi/ml under same costs
 
 PerformanceChart - OOS badge + reference line at oos_start when ml validation is present. train bars shaded lightly so interviewers can see we don't trade the train set
 
-RunHistory - GET /api/runs, click row → GET /api/runs/:id, parent swaps results (incl trades + extra metrics from meta). historyKey bumps after a new run so the list refreshes
+RunHistory - GET /api/runs, click row → GET /api/runs/:id (incl trades + desk_note from meta). historyKey bumps after a new run
 
 sqlite not postgres - on purpose. one person demo. say that if someone asks "why not postgres"
 

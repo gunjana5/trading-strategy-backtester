@@ -167,3 +167,25 @@ def get_run(run_id: int) -> dict | None:
     out["equity_curve"] = json.loads(row["equity_json"]) if row["equity_json"] else None
     out["buy_hold_curve"] = json.loads(row["buy_hold_json"]) if row["buy_hold_json"] else None
     return out
+
+
+def update_run_note(run_id: int, note: str) -> dict | None:
+    # desk note lives in meta_json so older dbs dont need a new column
+    note = (note or "").strip()
+    if len(note) > 500:
+        raise ValueError("desk note must be 500 characters or fewer")
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT meta_json FROM backtest_runs WHERE id = ?",
+            (int(run_id),),
+        ).fetchone()
+        if row is None:
+            return None
+        meta = json.loads(row["meta_json"] or "{}")
+        meta["desk_note"] = note
+        conn.execute(
+            "UPDATE backtest_runs SET meta_json = ? WHERE id = ?",
+            (json.dumps(meta), int(run_id)),
+        )
+        conn.commit()
+    return get_run(run_id)

@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 from backtester.engine import backtest, buy_hold_curve, price_signals_payload
 from data.fetcher import fetch_ohlcv
-from data.run_store import get_run, list_runs, save_run
+from data.run_store import get_run, list_runs, save_run, update_run_note
 from strategies import ml_strategy, moving_average, rsi_strategy
 
 app = Flask(__name__)
@@ -224,6 +224,7 @@ def api_backtest():
                 "stop_exits": bt.get("stop_exits", 0),
             },
             "trades": bt.get("trades") or [],
+            "desk_note": "",
             "metrics_extra": {
                 "sortino_ratio": bt.get("sortino_ratio"),
                 "avg_win_pct": bt.get("avg_win_pct"),
@@ -287,6 +288,7 @@ def api_backtest():
             "halt_reason": bt.get("halt_reason"),
             "stop_exits": bt.get("stop_exits", 0),
             "trades": bt.get("trades") or [],
+            "desk_note": "",
             "validation": validation,
             "oos_window": oos,
             "meta": meta,
@@ -312,6 +314,114 @@ def api_run_detail(run_id: int):
     if row is None:
         return jsonify({"error": "run not found"}), 404
     return jsonify(row)
+
+
+@app.route("/api/runs/<int:run_id>/note", methods=["PATCH", "POST"])
+def api_run_note(run_id: int):
+    # short judgment line after a run - not part of the engine
+    try:
+        body = request.get_json(silent=True) or {}
+        note = body.get("note", "")
+        row = update_run_note(run_id, note)
+        if row is None:
+            return jsonify({"error": "run not found"}), 404
+        return jsonify({"id": row["id"], "desk_note": (row.get("meta") or {}).get("desk_note", "")})
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"could not save note: {e!s}"}), 500
+
+
+def _metric_row(sk: str, bt: dict, validation=None) -> dict:
+    oos = None
+    if validation:
+        oos = validation.get("mean_oos_accuracy")
+        if oos is None:
+            oos = validation.get("oos_accuracy")
+    return {
+        "strategy": sk,
+        "total_return": bt.get("total_return"),
+        "sharpe_ratio": bt.get("sharpe_ratio"),
+        "sortino_ratio": bt.get("sortino_ratio"),
+        "max_drawdown": bt.get("max_drawdown"),
+        "win_rate": bt.get("win_rate"),
+        "num_trades": bt.get("num_trades"),
+        "total_costs": bt.get("total_costs"),
+        "time_in_market": bt.get("time_in_market"),
+        "profit_factor": bt.get("profit_factor"),
+        "halted": bt.get("halted", False),
+        "mean_oos_accuracy": oos,
+    }
+
+
+@app.route("/api/compare", methods=["POST"])
+def api_compare():
+    # same ticker/dates/costs - ma vs rsi vs ml side by side
+    try:
+        body = request.get_json(silent=True)
+        if not body:
+            return jsonify({"error": "expected json body with ticker, start, end"}), 400
+        ticker = body.get("ticker")
+        start = body.get("start")
+        end = body.get("end")
+        params = body.get("params") or {}
+        if not ticker or not start or not end:
+            return jsonify({"error": "ticker, start, and end are required"}), 400
+        try:
+            datetime.strptime(str(start)[:10], "%Y-%m-%d")
+            datetime.strptime(str(end)[:10], "%Y-%m-%d")
+        except ValueError:
+            return jsonify({"error": "start and end must be valid dates (yyyy-mm-dd)"}), 400
+
+        costs = _cost_risk_from_body(body)
+        if costs["max_drawdown_pct"] is not None and costs["max_drawdown_pct"] <= 0:
+            costs["max_drawdown_pct"] = None
+        if costs["stop_loss_pct"] is not None and costs["stop_loss_pct"] <= 0:
+            costs["stop_loss_pct"] = None
+        if costs["position_size_pct"] <= 0 or costs["position_size_pct"] > 100:
+            return jsonify({"error": "position_size_pct must be between 0 and 100"}), 400
+
+        base = fetch_ohlcv(ticker, start, end)
+        # defaults so compare is fair without needing every slider filled
+        strategy_params = {
+            "ma": {"fast": int(params.get("fast", 20)), "slow": int(params.get("slow", 50))},
+            "rsi": {
+                "period": int(params.get("period", 14)),
+                "overbought": float(params.get("overbought", 70)),
+                "oversold": float(params.get("oversold", 30)),
+            },
+            "ml": {
+                "walk_forward": bool(params.get("walk_forward", True)),
+                "n_folds": int(params.get("n_folds", 3)),
+            },
+        }
+
+        rows = []
+        for sk in ("ma", "rsi", "ml"):
+            df = base.copy()
+            df, validation = _apply_strategy(df, sk, strategy_params[sk])
+            bt, _bh = _simulate(df, costs)
+            rows.append(_metric_row(sk, bt, validation))
+
+        return jsonify(
+            {
+                "ticker": str(ticker).upper(),
+                "start": str(start)[:10],
+                "end": str(end)[:10],
+                "costs": {
+                    "commission_bps": costs["commission_bps"],
+                    "slippage_bps": costs["slippage_bps"],
+                    "position_size_pct": costs["position_size_pct"],
+                    "max_drawdown_pct": costs["max_drawdown_pct"],
+                    "stop_loss_pct": costs["stop_loss_pct"],
+                },
+                "rows": rows,
+            }
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"compare failed: {e!s}"}), 500
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ function TipLabel({ children, tip }) {
   );
 }
 
-export default function StrategySelector({ onRun, loading, error }) {
+export default function StrategySelector({ onRun, onCompare, loading, error }) {
   const [tickers, setTickers] = useState([]);
   const [ticker, setTicker] = useState("aapl");
   const [start, setStart] = useState("");
@@ -98,33 +98,46 @@ export default function StrategySelector({ onRun, loading, error }) {
     positionSizePct,
   ]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const buildPayload = () => ({
+    ticker,
+    start,
+    end,
+    strategy,
+    params,
+    commission_bps: commissionBps,
+    slippage_bps: slippageBps,
+    max_drawdown_pct: maxDrawdownPct || null,
+    stop_loss_pct: stopLossPct || null,
+    position_size_pct: positionSizePct,
+  });
+
+  const validate = () => {
     setFormErr(null);
     if (strategy === "moving_average_crossover" && fast >= slow) {
       setFormErr("fast period must be smaller than slow period");
-      return;
+      return false;
     }
     if (strategy === "rsi_strategy" && oversold >= overbought) {
       setFormErr("oversold must be below overbought");
-      return;
+      return false;
     }
     if (new Date(start) > new Date(end)) {
       setFormErr("start date must be on or before end date");
-      return;
+      return false;
     }
-    onRun({
-      ticker,
-      start,
-      end,
-      strategy,
-      params,
-      commission_bps: commissionBps,
-      slippage_bps: slippageBps,
-      max_drawdown_pct: maxDrawdownPct || null,
-      stop_loss_pct: stopLossPct || null,
-      position_size_pct: positionSizePct,
-    });
+    return true;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    onRun(buildPayload());
+  };
+
+  const handleCompare = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    onCompare?.(buildPayload());
   };
 
   const showMa = strategy === "moving_average_crossover";
@@ -348,6 +361,18 @@ export default function StrategySelector({ onRun, loading, error }) {
             <InfoTip text="fires the whole paper sim and shows charts metrics and trades on the right" />
           </span>
         )}
+      </button>
+
+      <button
+        type="button"
+        className="compare-btn"
+        disabled={loading || !tickers.length || !onCompare}
+        onClick={handleCompare}
+      >
+        <span className="btn-inner">
+          compare ma / rsi / ml
+          <InfoTip text="same ticker dates costs - runs all three and shows a side by side table" />
+        </span>
       </button>
 
       {(formErr || error) && (

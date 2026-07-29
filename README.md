@@ -75,6 +75,9 @@ UI posts ticker / dates / strategy / costs -> Flask fetches (or hits the 24h cac
 - position size % of cash (not forced all-in)
 - trade blotter - closed round-trips with entry/exit, pnl %, reason, fees
 - metrics beyond a green curve: Sortino, avg win/loss, time-in-market, profit factor
+- **compare mode** - same ticker/dates/costs, MA vs RSI vs ML in one table
+- **desk note** on a run - short judgment line you save after looking at the charts
+- **csv export** - metrics + trades download
 - ML path: **OOS only** badge + train/test date labels on the chart; walk-forward fold table
 - run history in SQLite - click a past run and reload the curves
 - strategies stay dumb: they only emit `1 / -1 / 0`; the engine owns fills and risk
