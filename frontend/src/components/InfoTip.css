@@ -1,4 +1,4 @@
-/* tiny ? popover - resets uppercase from parent labels */
+/* tip popover portals to body - fixed so overflow parents cant clip it */
 .info-tip {
   position: relative;
   display: inline-flex;
@@ -22,42 +22,71 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  opacity: 0.8;
-  transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  opacity: 0.85;
+  transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease,
+    background 0.15s ease;
 }
 
 .info-tip-btn:hover,
-.info-tip-btn:focus-visible {
+.info-tip-btn:focus-visible,
+.info-tip-btn.is-open {
   opacity: 1;
-  color: var(--amber);
+  color: var(--ink);
+  background: var(--amber);
   border-color: var(--amber);
   outline: none;
 }
 
 .info-tip-pop {
-  position: absolute;
-  z-index: 40;
-  top: calc(100% + 6px);
-  left: 0;
-  min-width: 11rem;
-  max-width: 16rem;
-  padding: 0.5rem 0.6rem;
-  border: 1px solid var(--line);
-  background: var(--ink-2);
-  color: var(--muted);
-  font-size: 0.68rem;
+  position: fixed;
+  z-index: 10050;
+  min-width: 11.5rem;
+  max-width: min(17rem, calc(100vw - 1.25rem));
+  padding: 0.55rem 0.65rem 0.55rem 0.7rem;
+  border: 1.5px solid var(--amber);
+  background: #1a2438;
+  color: #d5dceb;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
-  line-height: 1.4;
+  line-height: 1.45;
   white-space: normal;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+  animation: tipIn 0.16s ease-out;
 }
 
-.info-tip.align-right .info-tip-pop {
-  /* flip when the tip sits near the right edge */
-  left: auto;
-  right: 0;
+.info-tip-pop-pin {
+  position: absolute;
+  top: -5px;
+  left: 12px;
+  width: 9px;
+  height: 9px;
+  background: #1a2438;
+  border-left: 1.5px solid var(--amber);
+  border-top: 1.5px solid var(--amber);
+  transform: rotate(45deg);
+}
+
+.info-tip-pop.place-above .info-tip-pop-pin {
+  top: auto;
+  bottom: -5px;
+  border-left: none;
+  border-top: none;
+  border-right: 1.5px solid var(--amber);
+  border-bottom: 1.5px solid var(--amber);
+}
+
+@keyframes tipIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .label-row {

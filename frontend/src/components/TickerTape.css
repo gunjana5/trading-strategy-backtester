@@ -1,0 +1,51 @@
+.ticker-tape {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  border-bottom: 1.5px solid var(--line);
+  background: linear-gradient(90deg, rgba(240, 164, 58, 0.12), rgba(158, 201, 255, 0.08));
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.tape-track {
+  display: flex;
+  width: max-content;
+  gap: 1.75rem;
+  padding: 0.4rem 0;
+  animation: tapeScroll 42s linear infinite;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.tape-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.tape-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--coral);
+  transform: rotate(45deg);
+}
+
+@keyframes tapeScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tape-track {
+    animation: none;
+  }
+}

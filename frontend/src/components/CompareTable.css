@@ -46,3 +46,19 @@
   font-weight: 700;
   color: var(--amber);
 }
+
+.compare-table tr.is-best {
+  background: rgba(61, 204, 156, 0.08);
+}
+
+.compare-table .best-tag {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--mint);
+  color: var(--mint);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}

@@ -18,6 +18,11 @@ function fmtPct(n) {
 export default function CompareTable({ data }) {
   if (!data?.rows?.length) return null;
   const { ticker, start, end, costs, rows } = data;
+  const bestReturn = rows.reduce((best, r) => {
+    const v = Number(r.total_return);
+    if (Number.isNaN(v)) return best;
+    return best == null || v > best ? v : best;
+  }, null);
 
   return (
     <section className="compare-root fade-in">
@@ -50,24 +55,31 @@ export default function CompareTable({ data }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={r.strategy}>
-                <td className="strat-name">{LABELS[r.strategy] || r.strategy}</td>
-                <td>{fmtPct(r.total_return)}</td>
-                <td>{fmt(r.sharpe_ratio)}</td>
-                <td>{fmt(r.sortino_ratio)}</td>
-                <td>{fmtPct(r.max_drawdown)}</td>
-                <td>{fmtPct(r.win_rate)}</td>
-                <td>{r.num_trades ?? "-"}</td>
-                <td>${fmt(r.total_costs)}</td>
-                <td>{fmtPct(r.time_in_market)}</td>
-                <td>
-                  {r.mean_oos_accuracy == null
-                    ? "-"
-                    : `${(Number(r.mean_oos_accuracy) * 100).toFixed(1)}%`}
-                </td>
-              </tr>
-            ))}
+            {rows.map((r) => {
+              const isBest =
+                bestReturn != null && Number(r.total_return) === bestReturn;
+              return (
+                <tr key={r.strategy} className={isBest ? "is-best" : undefined}>
+                  <td className="strat-name">
+                    {LABELS[r.strategy] || r.strategy}
+                    {isBest ? <span className="best-tag">best return</span> : null}
+                  </td>
+                  <td>{fmtPct(r.total_return)}</td>
+                  <td>{fmt(r.sharpe_ratio)}</td>
+                  <td>{fmt(r.sortino_ratio)}</td>
+                  <td>{fmtPct(r.max_drawdown)}</td>
+                  <td>{fmtPct(r.win_rate)}</td>
+                  <td>{r.num_trades ?? "-"}</td>
+                  <td>${fmt(r.total_costs)}</td>
+                  <td>{fmtPct(r.time_in_market)}</td>
+                  <td>
+                    {r.mean_oos_accuracy == null
+                      ? "-"
+                      : `${(Number(r.mean_oos_accuracy) * 100).toFixed(1)}%`}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
