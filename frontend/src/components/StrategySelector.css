@@ -1,19 +1,21 @@
 .strategy-panel {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
   padding: 1.1rem;
-  background: linear-gradient(145deg, #111111 0%, #0c0c0c 100%);
-  border: 1px solid #1f1f1f;
-  border-radius: 14px;
-  box-shadow: 0 0 0 1px rgba(0, 255, 136, 0.06), 0 12px 40px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(160deg, var(--panel) 0%, var(--slate) 100%);
+  border: 1.5px solid var(--line);
 }
 
 .panel-heading {
-  font-size: 0.7rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #6a6a6a;
+  color: var(--amber);
   margin-bottom: 0.15rem;
   display: flex;
   align-items: center;
@@ -22,6 +24,8 @@
 .panel-heading .info-tip-pop {
   text-transform: none;
   letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
 }
 
 .field {
@@ -30,26 +34,26 @@
   gap: 0.35rem;
 }
 
-.field > span {
+.field > span,
+.field .label-row {
   font-size: 0.72rem;
-  color: #9a9a9a;
+  color: var(--muted);
 }
 
 .field select,
 .field input[type="date"] {
-  background: #0a0a0a;
-  border: 1px solid #2a2a2a;
-  color: #e0e0e0;
-  padding: 0.45rem 0.55rem;
-  border-radius: 8px;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.5rem 0.55rem;
   font-size: 0.82rem;
 }
 
 .field select:focus,
 .field input:focus {
   outline: none;
-  border-color: #00ff88;
-  box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.15);
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-dim);
 }
 
 .field-row {
@@ -62,10 +66,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  padding: 0.65rem 0.5rem;
-  background: rgba(0, 255, 136, 0.03);
-  border-radius: 10px;
-  border: 1px dashed #252525;
+  padding: 0.7rem 0.55rem;
+  background: rgba(240, 164, 58, 0.05);
+  border: 1px dashed var(--line);
 }
 
 .slider-label {
@@ -73,31 +76,31 @@
   flex-direction: column;
   gap: 0.35rem;
   font-size: 0.72rem;
-  color: #9a9a9a;
+  color: var(--muted);
 }
 
 .slider-label input[type="range"] {
   width: 100%;
-  accent-color: #00ff88;
+  accent-color: var(--amber);
 }
 
 .run-btn {
   margin-top: 0.25rem;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1rem;
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #00ff88 0%, #00cc6e 100%);
-  color: #0a0a0a;
-  font-weight: 600;
-  font-size: 0.85rem;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  box-shadow: 0 4px 18px rgba(0, 255, 136, 0.25);
+  transition: transform 0.12s ease, background 0.12s ease;
 }
 
 .run-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(0, 255, 136, 0.35);
+  background: #ffb84d;
 }
 
 .run-btn:disabled {
@@ -114,8 +117,8 @@
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(10, 10, 10, 0.25);
-  border-top-color: #0a0a0a;
+  border: 2px solid rgba(11, 18, 32, 0.25);
+  border-top-color: var(--ink);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -129,26 +132,25 @@
 .inline-msg {
   font-size: 0.75rem;
   padding: 0.45rem 0.55rem;
-  border-radius: 8px;
   line-height: 1.45;
   word-break: break-word;
 }
 
 .inline-msg.error {
-  background: rgba(255, 80, 80, 0.12);
-  border: 1px solid rgba(255, 80, 80, 0.35);
-  color: #ff9b9b;
+  background: var(--coral-dim);
+  border: 1px solid rgba(255, 92, 77, 0.4);
+  color: #ffb0a8;
 }
 
 .inline-msg.warn {
-  background: rgba(255, 200, 100, 0.08);
-  border: 1px solid rgba(255, 200, 100, 0.25);
+  background: rgba(240, 164, 58, 0.1);
+  border: 1px solid rgba(240, 164, 58, 0.35);
   color: #e8c88a;
 }
 
 .panel-heading.subtle {
   margin-top: 0.35rem;
-  color: #555;
+  color: var(--ice);
 }
 
 .check-label {
@@ -156,16 +158,16 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.78rem;
-  color: #b0b0b0;
+  color: var(--text);
 }
 
 .check-label input {
-  accent-color: #00ff88;
+  accent-color: var(--amber);
 }
 
 .hint {
   margin: 0.25rem 0 0;
   font-size: 0.68rem;
   line-height: 1.4;
-  color: #666;
+  color: var(--quiet);
 }

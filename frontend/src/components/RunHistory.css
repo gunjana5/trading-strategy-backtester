@@ -1,35 +1,45 @@
 .run-history {
+  position: relative;
+  z-index: 1;
   margin-top: 0.75rem;
-  padding: 0.85rem;
-  border-radius: 12px;
-  border: 1px solid #1f1f1f;
-  background: #0c0c0c;
+  padding: 0.9rem;
+  border: 1.5px solid var(--line);
+  background: var(--slate);
 }
 
 .run-history-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-family: var(--font-display);
   font-size: 0.68rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6a6a6a;
+  color: var(--ice);
   margin-bottom: 0.55rem;
+}
+
+.run-history-head .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
 }
 
 .ghost-btn {
   background: transparent;
-  border: 1px solid #2a2a2a;
-  color: #9a9a9a;
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--muted);
   font-size: 0.65rem;
-  padding: 0.2rem 0.45rem;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
+  font-family: var(--font-mono);
 }
 
 .ghost-btn:hover {
-  color: #00ff88;
-  border-color: #00ff88;
+  color: var(--amber);
+  border-color: var(--amber);
 }
 
 .run-list {
@@ -50,43 +60,43 @@
   grid-template-columns: auto 1fr auto;
   gap: 0.4rem;
   align-items: center;
-  background: #101010;
-  border: 1px solid #1c1c1c;
-  border-radius: 8px;
-  padding: 0.4rem 0.5rem;
-  color: #d0d0d0;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.45rem 0.55rem;
+  color: var(--text);
   cursor: pointer;
   font-size: 0.72rem;
 }
 
 .run-item:hover {
-  border-color: rgba(0, 255, 136, 0.35);
+  border-color: var(--amber);
 }
 
 .run-ticker {
   font-weight: 700;
-  color: #00ff88;
+  color: var(--amber);
+  font-family: var(--font-display);
 }
 
 .run-meta {
-  color: #888;
+  color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .run-date {
-  color: #555;
+  color: var(--quiet);
   font-size: 0.65rem;
 }
 
 .run-history-empty,
 .run-history-err {
   font-size: 0.7rem;
-  color: #777;
+  color: var(--quiet);
   margin: 0.25rem 0;
 }
 
 .run-history-err {
-  color: #ff8a8a;
+  color: var(--coral);
 }

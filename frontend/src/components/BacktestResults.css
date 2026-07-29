@@ -14,19 +14,20 @@
 
 .pill {
   display: inline-block;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  padding: 0.28rem 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #0a0a0a;
-  background: linear-gradient(90deg, #00ff88, #3dffaa);
-  font-weight: 700;
+  color: var(--ink);
+  background: var(--amber);
+  font-weight: 800;
+  transform: rotate(-1deg);
 }
 
 .subtle {
   font-size: 0.7rem;
-  color: #6a6a6a;
+  color: var(--quiet);
 }
 
 .charts-stack {
@@ -42,7 +43,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -53,51 +54,54 @@
 .honesty-banner {
   font-size: 0.72rem;
   line-height: 1.45;
-  color: #b8b8b8;
-  background: rgba(0, 255, 136, 0.06);
-  border: 1px solid rgba(0, 255, 136, 0.18);
-  border-radius: 10px;
+  color: var(--text);
+  background: var(--mint-dim);
+  border: 1px solid rgba(61, 204, 156, 0.35);
   padding: 0.65rem 0.8rem;
 }
 
 .honesty-banner.warn {
-  background: rgba(255, 107, 107, 0.08);
-  border-color: rgba(255, 107, 107, 0.28);
-  color: #ffb4b4;
+  background: var(--coral-dim);
+  border-color: rgba(255, 92, 77, 0.4);
+  color: #ffc0ba;
 }
 
 .fold-table-wrap {
   overflow-x: auto;
-  border: 1px solid #222;
-  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--slate);
 }
 
 .fold-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.72rem;
-  color: #cfcfcf;
+  color: var(--text);
 }
 
 .fold-table th,
 .fold-table td {
   padding: 0.45rem 0.65rem;
   text-align: left;
-  border-bottom: 1px solid #1c1c1c;
+  border-bottom: 1px solid var(--line);
 }
 
 .fold-table th {
-  color: #777;
-  font-weight: 500;
+  color: var(--quiet);
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
 }
 
 .oos-tag {
-  color: #00ff88;
+  color: var(--mint);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-size: 0.68rem;
+  font-family: var(--font-display);
+  font-weight: 700;
 }
 
 .cost-toggle {
@@ -105,16 +109,16 @@
   align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: #b0b0b0;
+  color: var(--muted);
   cursor: pointer;
 }
 
 .cost-toggle input {
-  accent-color: #00ff88;
+  accent-color: var(--amber);
   margin-top: 0.15rem;
 }
 
 .cost-toggle em {
-  color: #777;
+  color: var(--quiet);
   font-style: normal;
 }

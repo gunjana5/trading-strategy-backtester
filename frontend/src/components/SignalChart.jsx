@@ -19,7 +19,7 @@ function BuyTriangle(props) {
   return (
     <path
       d={`M${cx},${cy - 7} L${cx - 6},${cy + 5} L${cx + 6},${cy + 5} Z`}
-      fill="#00ff88"
+      fill="#3dcc9c"
       stroke="#004d33"
       strokeWidth={0.6}
     />
@@ -32,7 +32,7 @@ function SellTriangle(props) {
   return (
     <path
       d={`M${cx},${cy + 7} L${cx - 6},${cy - 5} L${cx + 6},${cy - 5} Z`}
-      fill="#ff5555"
+      fill="#ff5c4d"
       stroke="#551111"
       strokeWidth={0.6}
     />
@@ -74,27 +74,27 @@ export default function SignalChart({ priceSeries }) {
       <div className="signal-wrap">
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart data={chartData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 6" stroke="#1a1a1a" vertical={false} />
+            <CartesianGrid strokeDasharray="3 6" stroke="#2c3b5a" vertical={false} />
             <XAxis
               dataKey="date"
               tick={{ fill: "#7a7a7a", fontSize: 10 }}
               tickFormatter={formatTickDate}
               minTickGap={28}
-              stroke="#2a2a2a"
+              stroke="#2c3b5a"
             />
             <YAxis
               tick={{ fill: "#7a7a7a", fontSize: 10 }}
               tickFormatter={(v) => `$${Number(v).toFixed(0)}`}
-              stroke="#2a2a2a"
+              stroke="#2c3b5a"
               width={52}
             />
             <Tooltip
               contentStyle={{
-                background: "#111111",
-                border: "1px solid #2a2a2a",
-                borderRadius: 8,
+                background: "#0b1220",
+                border: "1px solid #2c3b5a",
+                borderRadius: 0,
                 fontSize: 12,
-                fontFamily: "JetBrains Mono, monospace",
+                fontFamily: "IBM Plex Mono, monospace",
               }}
               formatter={(value, name) => {
                 if (name === "close") return [`$${Number(value).toFixed(2)}`, "close"];
@@ -105,13 +105,13 @@ export default function SignalChart({ priceSeries }) {
             <Line
               type="monotone"
               dataKey="close"
-              stroke="#66ffc6"
+              stroke="#9ec9ff"
               strokeWidth={1.4}
               dot={false}
               isAnimationActive
             />
-            <Scatter dataKey="buy" fill="#00ff88" shape={BuyTriangle} isAnimationActive={false} />
-            <Scatter dataKey="sell" fill="#ff5555" shape={SellTriangle} isAnimationActive={false} />
+            <Scatter dataKey="buy" fill="#3dcc9c" shape={BuyTriangle} isAnimationActive={false} />
+            <Scatter dataKey="sell" fill="#ff5c4d" shape={SellTriangle} isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

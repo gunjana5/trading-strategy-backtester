@@ -1,16 +1,17 @@
 .signal-card {
-  background: linear-gradient(160deg, #101010 0%, #0b0b0b 100%);
-  border: 1px solid #1e1e1e;
-  border-radius: 14px;
-  padding: 0.85rem 0.75rem 0.65rem;
+  background: linear-gradient(165deg, var(--panel) 0%, var(--slate) 100%);
+  border: 1.5px solid var(--line);
+  padding: 0.9rem 0.8rem 0.7rem;
 }
 
 .signal-title {
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #7a7a7a;
-  margin: 0 0 0.35rem 0.25rem;
+  color: var(--paper);
+  margin: 0 0 0.35rem 0.15rem;
 }
 
 .signal-legend {
@@ -21,11 +22,11 @@
 }
 
 .leg-buy {
-  color: #00ff88;
+  color: var(--mint);
 }
 
 .leg-sell {
-  color: #ff6b6b;
+  color: var(--coral);
 }
 
 .signal-wrap {

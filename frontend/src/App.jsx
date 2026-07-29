@@ -34,15 +34,24 @@ export default function App() {
       <SiteHelp />
       <aside className="sidebar">
         <header className="brand">
+          <div className="brand-mark" aria-hidden>
+            <img src="/icons/candles.svg" alt="" />
+          </div>
           <div className="brand-lockup">
+            <span className="brand-kicker">paper desk</span>
             <span className="brand-text">trading strategy</span>
             <span className="brand-text">backtester</span>
           </div>
-          <span className="brand-cursor" aria-hidden />
         </header>
+        <div className="stamp-row" aria-hidden>
+          <span className="stamp stamp-paper">paper only</span>
+          <span className="stamp stamp-desk">not live money</span>
+        </div>
+        <div className="spark-strip" aria-hidden>
+          <img src="/icons/spark.svg" alt="" />
+        </div>
         <p className="tagline">
-          paper runs · yahoo history · costs, risk limits, walk-forward honesty · click any ? for
-          help
+          yahoo history · costs + risk · walk-forward honesty · click any ? if a word looks weird
         </p>
         <StrategySelector onRun={handleRun} loading={loading} error={error} />
         <RunHistory onSelect={setResults} refreshKey={historyKey} />
@@ -54,14 +63,13 @@ export default function App() {
               <div className="empty-card">
                 <div className="empty-title">run a backtest</div>
                 <p className="empty-body">
-                  choose ticker and dates, set costs / risk, pick a strategy, press run. ml uses
-                  hold-out or walk-forward so in-sample bars are not traded. poke the little ? icons
-                  if a word looks weird or open the ? in the bottom right for the full site tour
+                  pick a ticker and dates on the left, tweak costs / risk, hit run. charts and the
+                  trade list show up here. poke the little ? icons or the corner ? for the tour
                 </p>
-                <div className="empty-dots">
-                  <span />
-                  <span />
-                  <span />
+                <div className="empty-icons" aria-hidden>
+                  <img src="/icons/candles.svg" alt="" />
+                  <img src="/icons/spark.svg" alt="" />
+                  <img src="/icons/ticket.svg" alt="" />
                 </div>
               </div>
             </div>

@@ -76,41 +76,41 @@ export default function PerformanceChart({
           <AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id={`${uid}-p`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#00ff88" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#00ff88" stopOpacity={0} />
+                <stop offset="0%" stopColor="#3dcc9c" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#3dcc9c" stopOpacity={0} />
               </linearGradient>
               <linearGradient id={`${uid}-b`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#888888" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="#888888" stopOpacity={0} />
+                <stop offset="0%" stopColor="#8b95a8" stopOpacity={0.28} />
+                <stop offset="100%" stopColor="#8b95a8" stopOpacity={0} />
               </linearGradient>
               <linearGradient id={`${uid}-z`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ffcc66" stopOpacity={0.22} />
-                <stop offset="100%" stopColor="#ffcc66" stopOpacity={0} />
+                <stop offset="0%" stopColor="#f0a43a" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="#f0a43a" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 6" stroke="#1a1a1a" vertical={false} />
+            <CartesianGrid strokeDasharray="3 6" stroke="#2c3b5a" vertical={false} />
             <XAxis
               dataKey="date"
               tick={{ fill: "#7a7a7a", fontSize: 10 }}
               tickFormatter={formatTickDate}
               minTickGap={28}
-              stroke="#2a2a2a"
+              stroke="#2c3b5a"
             />
             <YAxis
               tick={{ fill: "#7a7a7a", fontSize: 10 }}
               tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-              stroke="#2a2a2a"
+              stroke="#2c3b5a"
               width={48}
             />
             <Tooltip
               contentStyle={{
-                background: "#111111",
-                border: "1px solid #2a2a2a",
-                borderRadius: 8,
+                background: "#0b1220",
+                border: "1px solid #2c3b5a",
+                borderRadius: 0,
                 fontSize: 12,
-                fontFamily: "JetBrains Mono, monospace",
+                fontFamily: "IBM Plex Mono, monospace",
               }}
-              labelStyle={{ color: "#b0b0b0" }}
+              labelStyle={{ color: "#8b95a8" }}
               formatter={(value, name) => {
                 const labels = {
                   portfolio: "strategy (with costs)",
@@ -133,11 +133,11 @@ export default function PerformanceChart({
                 />
                 <ReferenceLine
                   x={oosStart}
-                  stroke="#00ff88"
+                  stroke="#3dcc9c"
                   strokeDasharray="4 4"
                   label={{
                     value: "OOS →",
-                    fill: "#00ff88",
+                    fill: "#3dcc9c",
                     fontSize: 10,
                     position: "insideTopRight",
                   }}
@@ -147,7 +147,7 @@ export default function PerformanceChart({
             <Area
               type="monotone"
               dataKey="benchmark"
-              stroke="#888888"
+              stroke="#8b95a8"
               strokeWidth={1.2}
               fill={`url(#${uid}-b)`}
               name="benchmark"
@@ -157,7 +157,7 @@ export default function PerformanceChart({
               <Area
                 type="monotone"
                 dataKey="zeroCost"
-                stroke="#ffcc66"
+                stroke="#f0a43a"
                 strokeWidth={1.2}
                 fill={`url(#${uid}-z)`}
                 name="zeroCost"
@@ -167,7 +167,7 @@ export default function PerformanceChart({
             <Area
               type="monotone"
               dataKey="portfolio"
-              stroke="#00ff88"
+              stroke="#3dcc9c"
               strokeWidth={1.5}
               fill={`url(#${uid}-p)`}
               name="portfolio"

@@ -4,6 +4,28 @@
   box-sizing: border-box;
 }
 
+:root {
+  --ink: #0b1220;
+  --ink-2: #101a2c;
+  --slate: #162033;
+  --panel: #1b2740;
+  --panel-2: #22304d;
+  --line: #2c3b5a;
+  --paper: #f2e6d0;
+  --amber: #f0a43a;
+  --amber-dim: rgba(240, 164, 58, 0.16);
+  --coral: #ff5c4d;
+  --coral-dim: rgba(255, 92, 77, 0.14);
+  --mint: #3dcc9c;
+  --mint-dim: rgba(61, 204, 156, 0.14);
+  --ice: #9ec9ff;
+  --text: #e8edf7;
+  --muted: #8b95a8;
+  --quiet: #667089;
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
 html,
 body,
 #root {
@@ -12,9 +34,9 @@ body,
 }
 
 body {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  background: #0a0a0a;
-  color: #e0e0e0;
+  font-family: var(--font-mono);
+  background: var(--ink);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -22,4 +44,9 @@ button,
 input,
 select {
   font-family: inherit;
+}
+
+::selection {
+  background: var(--amber);
+  color: var(--ink);
 }

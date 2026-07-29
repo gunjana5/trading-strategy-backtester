@@ -1,45 +1,52 @@
 .risk-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 0.55rem;
 }
 
 .risk-card {
-  padding: 0.75rem 0.85rem;
-  border-radius: 12px;
-  border: 1px solid #222222;
-  background: #0e0e0e;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--slate);
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 .risk-card:hover {
-  border-color: #2f2f2f;
-  box-shadow: 0 0 24px rgba(0, 255, 136, 0.06);
+  border-color: var(--amber);
+  transform: translateY(-1px);
 }
 
 .risk-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6f6f6f;
+  color: var(--quiet);
   margin-bottom: 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.risk-label .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
 }
 
 .risk-value {
   font-size: 1.05rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .risk-card.tone-good .risk-value {
-  color: #00ff88;
-  text-shadow: 0 0 18px rgba(0, 255, 136, 0.25);
+  color: var(--mint);
 }
 
 .risk-card.tone-bad .risk-value {
-  color: #ff6b6b;
-  text-shadow: 0 0 14px rgba(255, 80, 80, 0.2);
+  color: var(--coral);
 }
 
 .risk-card.tone-neutral .risk-value {
-  color: #d8d8d8;
+  color: var(--ice);
 }
