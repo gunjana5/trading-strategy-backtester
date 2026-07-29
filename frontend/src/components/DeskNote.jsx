@@ -11,6 +11,7 @@ export default function DeskNote({ runId, initialNote = "" }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // reset local draft when the selected run changes
     setNote(initialNote || "");
     setStatus(null);
   }, [runId, initialNote]);

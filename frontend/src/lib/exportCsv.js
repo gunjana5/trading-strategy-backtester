@@ -1,6 +1,7 @@
 // build a csv blob from one backtest result
 
 function esc(v) {
+  // wrap if comma/quote/newline shows up
   const s = v == null ? "" : String(v);
   if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
@@ -9,6 +10,7 @@ function esc(v) {
 export function downloadRunCsv(data) {
   if (!data) return;
   const lines = [];
+  // section 1: flat metrics as key/value rows
   lines.push("section,key,value");
   const metrics = [
     ["run_id", data.run_id],
@@ -32,6 +34,7 @@ export function downloadRunCsv(data) {
     lines.push(["metrics", k, v].map(esc).join(","));
   }
 
+  // section 2: trade blotter as a proper table
   lines.push("");
   lines.push("entry_date,exit_date,entry_price,exit_price,pnl_pct,reason,fees,shares");
   for (const t of data.trades || []) {
@@ -51,6 +54,7 @@ export function downloadRunCsv(data) {
     );
   }
 
+  // trigger a download without navigating away
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

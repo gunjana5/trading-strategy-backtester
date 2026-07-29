@@ -11,6 +11,7 @@ export default function DeskStamp() {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
+    // tick every second - just a desk clock, not trading hours
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);

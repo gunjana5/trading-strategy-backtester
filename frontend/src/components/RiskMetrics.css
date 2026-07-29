@@ -37,7 +37,7 @@
 .risk-value {
   font-size: 1.05rem;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; /* stop digits jumping while animating */
 }
 
 .risk-card.tone-good .risk-value {

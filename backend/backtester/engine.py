@@ -45,6 +45,7 @@ def backtest(
     signals = df["signal"].values
     dates = df.index
     n = len(df)
+    # book state - cash + shares mark-to-market each bar
     cash = float(initial_capital)
     shares = 0.0
     equity = np.zeros(n)
@@ -94,6 +95,7 @@ def backtest(
             pnl_pct = (fill - entry_price) / entry_price * 100.0
             # dollar pnl vs entry notional (approx, after round-trip fees)
             dollar_pnl = shares * (fill - entry_price) - fees_total
+            # blotter row - ui reads this list as-is
             trades.append(
                 {
                     "entry_date": entry_date or _date_str(dates[exit_idx]),
@@ -124,6 +126,7 @@ def backtest(
 
     for i in range(n):
         price = prices[i]
+        # bad bar - carry prior mark so the curve doesnt jump to zero
         if price <= 0 or np.isnan(price):
             equity[i] = cash + shares * (prices[max(0, i - 1)] if i > 0 else 0.0)
             continue
@@ -157,6 +160,7 @@ def backtest(
             halt_reason = "max_drawdown"
             dd_halts += 1
 
+        # once halted, ignore strategy signals for the rest of the loop
         sig = 0 if halted else signals[i]
 
         if sig == 1 and cash > 0 and shares == 0:
@@ -164,6 +168,7 @@ def backtest(
             if fill <= 0:
                 equity[i] = cash
                 continue
+            # only deploy position_size_pct of cash - rest sits idle
             deploy = cash * (position_size_pct / 100.0)
             fee = _commission(deploy)
             spendable = deploy - fee
@@ -185,10 +190,12 @@ def backtest(
         equity[i] = cash + shares * price
         peak_equity = max(peak_equity, equity[i])
 
+    # headline metrics from the finished equity path
     equity_series = pd.Series(equity, index=dates)
     final = float(equity[-1])
     total_return = (final / initial_capital - 1.0) * 100.0
     daily_rets = equity_series.pct_change().dropna()
+    # annualise with 252 trading days
     if len(daily_rets) > 1 and daily_rets.std() > 1e-12:
         ann_ret = float((1.0 + daily_rets.mean()) ** 252 - 1.0)
         ann_vol = float(daily_rets.std() * np.sqrt(252))
@@ -203,6 +210,7 @@ def backtest(
         downside_vol = float(downside.std() * np.sqrt(252))
         sortino_ratio = ann_ret / downside_vol if downside_vol > 1e-12 else 0.0
     elif len(daily_rets) > 1 and (daily_rets >= 0).all():
+        # no losing days - treat sortino like sharpe rather than blowing up
         sortino_ratio = float(sharpe_ratio) if sharpe_ratio else 0.0
     else:
         sortino_ratio = 0.0
@@ -215,6 +223,7 @@ def backtest(
     avg_win_pct = float(np.mean(win_pnls)) if win_pnls else 0.0
     avg_loss_pct = float(np.mean(loss_pnls)) if loss_pnls else 0.0
     time_in_market = (days_invested / n * 100.0) if n > 0 else 0.0
+    # profit factor = gross wins / gross losses; inf if never lost
     if gross_loss > 1e-12:
         profit_factor = float(gross_profit / gross_loss)
     elif gross_profit > 0:
@@ -266,6 +275,7 @@ def buy_hold_curve(df, initial_capital=10000, commission_bps=0.0, slippage_bps=0
     spendable = initial_capital - fee
     shares = spendable / fill
     out = []
+    # mark shares each day - no rebalancing, no sells
     for idx, price in prices.items():
         if np.isnan(price) or price <= 0:
             continue
@@ -284,6 +294,7 @@ def price_signals_payload(df):
     rows = []
     for idx, row in df.iterrows():
         c = float(row["close"])
+        # nan signal = flat so recharts doesnt get weird
         s = int(row["signal"]) if not pd.isna(row["signal"]) else 0
         rows.append({"date": _date_str(idx), "close": c, "signal": s})
     return rows

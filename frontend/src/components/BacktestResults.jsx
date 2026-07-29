@@ -11,9 +11,11 @@ import TradeBlotter from "./TradeBlotter.jsx";
 import "./BacktestResults.css";
 
 export default function BacktestResults({ data }) {
+  // overlay fantasy zero-fee equity on the same chart
   const [showZeroCost, setShowZeroCost] = useState(false);
 
   if (!data) return null;
+  // rename snake_case api fields once so the jsx reads cleaner
   const {
     equity_curve: equityCurve,
     buy_hold_curve: buyHoldCurve,
@@ -45,6 +47,7 @@ export default function BacktestResults({ data }) {
     meta,
   } = data;
 
+  // note may live top-level (fresh run) or nested in meta (reopened)
   const note = deskNote || meta?.desk_note || "";
 
   return (

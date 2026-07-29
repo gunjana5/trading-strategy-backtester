@@ -27,12 +27,14 @@ def fetch_ohlcv(ticker, start, end):
     for name in need:
         if name in raw.columns:
             out[name] = raw[name]
+    # fallback if close missing but adj close exists
     if "close" not in out.columns and "adj close" in raw.columns:
         out["close"] = raw["adj close"]
     missing = [c for c in need if c not in out.columns]
     if missing:
         raise ValueError(f"missing columns for {t}: {missing}")
     out = out[need].copy()
+    # strip tz so date joins / chart labels stay simple
     out.index = pd.to_datetime(out.index).tz_localize(None)
     out = out.sort_index()
     out = out.dropna(how="any")

@@ -38,7 +38,7 @@
 }
 
 .info-tip-pop {
-  position: fixed;
+  position: fixed; /* portal target - not relative to the button's overflow parent */
   z-index: 10050;
   min-width: 11.5rem;
   max-width: min(17rem, calc(100vw - 1.25rem));

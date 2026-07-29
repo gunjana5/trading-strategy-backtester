@@ -41,6 +41,7 @@ def _normalize_strategy(name):
     # frontend sends long names; engine keys are short (ma/rsi/ml)
     if not name:
         return None
+    # squash spaces/hyphens so "rsi strategy" and "rsi_strategy" both land
     s = str(name).lower().strip().replace(" ", "_").replace("-", "_")
     aliases = {
         "moving_average_crossover": "ma",
@@ -60,12 +61,14 @@ def _cost_risk_from_body(body: dict) -> dict:
     params = body.get("params") or {}
 
     def pick(key, default):
+        # body wins over nested params when both are present
         if key in body and body[key] is not None:
             return body[key]
         if key in params and params[key] is not None:
             return params[key]
         return default
 
+    # 0 on the halt/stop sliders means off (None for the engine)
     return {
         "commission_bps": float(pick("commission_bps", 5)),
         "slippage_bps": float(pick("slippage_bps", 5)),
@@ -79,11 +82,12 @@ def _cost_risk_from_body(body: dict) -> dict:
 def _apply_strategy(df, strategy_key, params):
     # signals once - then we can backtest with/without costs on the same df
     params = params or {}
-    validation = None
+    validation = None  # only ml fills this (folds / oos accuracy)
 
     if strategy_key == "ma":
         fast = int(params.get("fast", 20))
         slow = int(params.get("slow", 50))
+        # catch nonsense before rolling averages waste a fetch
         if fast >= slow:
             raise ValueError("fast period must be smaller than slow period")
         if fast < 2 or slow < 3:
@@ -108,6 +112,7 @@ def _apply_strategy(df, strategy_key, params):
 
 
 def _simulate(df, costs):
+    # strategy curve + buy&hold baseline share the same capital / fee knobs
     capital = costs["initial_capital"]
     bt = backtest(
         df,
@@ -170,6 +175,7 @@ def api_backtest():
                     "error": "strategy must be one of: moving average crossover, rsi strategy, ml signal",
                 }
             ), 400
+        # [:10] so "2024-01-01T00:00:00Z" still parses as a day
         try:
             datetime.strptime(str(start)[:10], "%Y-%m-%d")
             datetime.strptime(str(end)[:10], "%Y-%m-%d")
@@ -177,6 +183,7 @@ def api_backtest():
             return jsonify({"error": "start and end must be valid dates (yyyy-mm-dd)"}), 400
 
         costs = _cost_risk_from_body(body)
+        # treat <=0 as off even if pick() left a float
         if costs["max_drawdown_pct"] is not None and costs["max_drawdown_pct"] <= 0:
             costs["max_drawdown_pct"] = None
         if costs["stop_loss_pct"] is not None and costs["stop_loss_pct"] <= 0:
@@ -184,6 +191,7 @@ def api_backtest():
         if costs["position_size_pct"] <= 0 or costs["position_size_pct"] > 100:
             return jsonify({"error": "position_size_pct must be between 0 and 100"}), 400
 
+        # fetch, signal, chart payload, then two sims (with fees + zero fees)
         df = fetch_ohlcv(ticker, start, end)
         df, validation = _apply_strategy(df, sk, params)
         series = price_signals_payload(df)
@@ -198,6 +206,7 @@ def api_backtest():
         bt_zero, bh_zero = _simulate(df, zero_costs)
         oos = _oos_window(validation)
 
+        # merge strategy knobs + cost knobs so reopen from history has everything
         persist_params = {
             **params,
             "commission_bps": costs["commission_bps"],
@@ -207,6 +216,7 @@ def api_backtest():
             "initial_capital": costs["initial_capital"],
             "position_size_pct": costs["position_size_pct"],
         }
+        # blob the ui needs later - trades / risk / extra metrics live in meta_json
         meta = {
             "validation": validation,
             "oos_window": oos,
@@ -255,6 +265,7 @@ def api_backtest():
             equity_curve=bt["equity_curve"],
             buy_hold_curve=bh,
         )
+        # flat response for the frontend - mirrors columns the charts/metrics expect
         out = {
             "run_id": run_id,
             "equity_curve": bt["equity_curve"],
@@ -302,6 +313,7 @@ def api_backtest():
 
 @app.route("/api/runs", methods=["GET"])
 def api_runs():
+    # optional ticker/strategy filters for the sidebar list
     limit = request.args.get("limit", default=20, type=int)
     ticker = request.args.get("ticker")
     strategy = request.args.get("strategy")
@@ -325,6 +337,7 @@ def api_run_note(run_id: int):
         row = update_run_note(run_id, note)
         if row is None:
             return jsonify({"error": "run not found"}), 404
+        # pull note back out of meta so the client gets a flat field
         return jsonify({"id": row["id"], "desk_note": (row.get("meta") or {}).get("desk_note", "")})
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -333,6 +346,7 @@ def api_run_note(run_id: int):
 
 
 def _metric_row(sk: str, bt: dict, validation=None) -> dict:
+    # one compare-table row - prefer mean oos when walk-forward ran
     oos = None
     if validation:
         oos = validation.get("mean_oos_accuracy")
@@ -381,6 +395,7 @@ def api_compare():
         if costs["position_size_pct"] <= 0 or costs["position_size_pct"] > 100:
             return jsonify({"error": "position_size_pct must be between 0 and 100"}), 400
 
+        # one yahoo pull, then three strategy copies so we dont re-hit the cache thrice
         base = fetch_ohlcv(ticker, start, end)
         # defaults so compare is fair without needing every slider filled
         strategy_params = {
@@ -398,7 +413,7 @@ def api_compare():
 
         rows = []
         for sk in ("ma", "rsi", "ml"):
-            df = base.copy()
+            df = base.copy()  # each strategy mutates its own frame
             df, validation = _apply_strategy(df, sk, strategy_params[sk])
             bt, _bh = _simulate(df, costs)
             rows.append(_metric_row(sk, bt, validation))

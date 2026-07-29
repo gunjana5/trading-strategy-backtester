@@ -19,6 +19,7 @@ cd ..
 
 # frontend (vite on 5173, proxies /api -> :5050)
 cd frontend
+# skip install if node_modules already there
 if [ ! -d node_modules ]; then
   npm install
 fi
@@ -26,6 +27,7 @@ npm run dev &
 FRONT_PID=$!
 cd ..
 
+# brief pause so flask/vite can bind before we open the browser
 sleep 3
 if command -v open >/dev/null 2>&1; then
   open "http://localhost:5173"
@@ -37,4 +39,5 @@ echo "backend pid: $BACKEND_PID  frontend pid: $FRONT_PID"
 echo "trading strategy backtester: http://localhost:5173"
 echo "api: http://127.0.0.1:5050"
 echo "press ctrl+c to stop both."
+# wait until either child dies (or we get ctrl+c)
 wait $FRONT_PID $BACKEND_PID 2>/dev/null || true

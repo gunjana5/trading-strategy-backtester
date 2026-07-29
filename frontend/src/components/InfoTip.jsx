@@ -37,6 +37,7 @@ export default function InfoTip({ text }) {
   useLayoutEffect(() => {
     if (!open || !btnRef.current || !popRef.current) return undefined;
     const measure = () => {
+      // remeasure on scroll/resize so the portal tip stays glued to the ?
       const btn = btnRef.current.getBoundingClientRect();
       const tip = popRef.current.getBoundingClientRect();
       setCoords(placeTip(btn, tip));
@@ -52,6 +53,7 @@ export default function InfoTip({ text }) {
 
   useEffect(() => {
     if (!open) return undefined;
+    // click-away + escape to close
     const onPointer = (e) => {
       const t = e.target;
       if (btnRef.current?.contains(t) || popRef.current?.contains(t)) return;

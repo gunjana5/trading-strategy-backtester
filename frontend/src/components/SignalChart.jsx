@@ -47,6 +47,7 @@ function formatTickDate(d) {
 }
 
 function buildChartRows(priceSeries) {
+  // scatter needs nulls on non-signal days or triangles pile up at y=0
   const rows = priceSeries || [];
   return rows.map((r) => ({
     date: r.date,
@@ -111,6 +112,7 @@ export default function SignalChart({ priceSeries }) {
               dot={false}
               isAnimationActive
             />
+            {/* custom shapes - default dots look too soft for buy/sell */}
             <Scatter dataKey="buy" fill="#3dcc9c" shape={BuyTriangle} isAnimationActive={false} />
             <Scatter dataKey="sell" fill="#ff5c4d" shape={SellTriangle} isAnimationActive={false} />
           </ComposedChart>

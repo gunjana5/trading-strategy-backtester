@@ -22,6 +22,7 @@ FEATURE_COLS = [
 
 def add_features(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
+    # classic TA stack the forest gets as inputs
     out["rsi"] = ta.momentum.RSIIndicator(out["close"], window=14).rsi()
     out["sma_20"] = ta.trend.SMAIndicator(out["close"], window=20).sma_indicator()
     out["sma_50"] = ta.trend.SMAIndicator(out["close"], window=50).sma_indicator()
@@ -38,6 +39,7 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _clf() -> RandomForestClassifier:
+    # fixed seed so reruns on the same window are comparable
     return RandomForestClassifier(
         n_estimators=100,
         max_depth=8,
@@ -61,10 +63,12 @@ def run_single_split(df: pd.DataFrame, train_frac: float = 0.7) -> tuple[pd.Data
     clf = _clf()
     clf.fit(train[FEATURE_COLS].values, train["label"].values.astype(int))
     pred = clf.predict(test[FEATURE_COLS].values)
+    # start flat everywhere, then only paint the test window
     out["signal"] = 0
     for idx in train.index:
         out.loc[idx, "signal"] = 0
     for idx, p in zip(test.index, pred):
+        # 1 = predicted up so buy; else flatten (-1)
         out.loc[idx, "signal"] = 1 if int(p) == 1 else -1
 
     # oos label accuracy for the honesty banner - not the same as trading pnl
@@ -119,7 +123,9 @@ def run_walk_forward(
     accuracies: list[float] = []
 
     for k in range(n_folds):
+        # fold k: train = everything before this block; test = next fold_size rows
         test_start = min_train_rows + k * fold_size
+        # last fold eats any leftover bars so we dont leave a stub unused
         test_end = n if k == n_folds - 1 else min_train_rows + (k + 1) * fold_size
         if test_start >= n or test_end <= test_start:
             break
@@ -151,6 +157,7 @@ def run_walk_forward(
         raise ValueError("walk-forward produced no valid folds - try a longer date range")
 
     mean_acc = float(np.mean(accuracies)) if accuracies else 0.0
+    # stitch oos signals across folds - engine sees one continuous signal column
     meta = {
         "mode": "walk_forward",
         "n_folds": len(folds),

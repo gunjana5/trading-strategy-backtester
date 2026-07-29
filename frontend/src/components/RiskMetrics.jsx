@@ -5,6 +5,7 @@ import InfoTip from "./InfoTip.jsx";
 import "./RiskMetrics.css";
 
 function useAnimatedScalar(target, durationMs = 1000) {
+  // count up from 0 whenever the target metric changes
   const [v, setV] = useState(0);
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +83,7 @@ export default function RiskMetrics({
   const animTrades = useAnimatedScalar(numTrades ?? 0);
   const animCosts = useAnimatedScalar(totalCosts ?? 0);
 
+  // tone helpers paint mint/coral - display strings use the animated values
   const cards = [
     {
       label: "total return",

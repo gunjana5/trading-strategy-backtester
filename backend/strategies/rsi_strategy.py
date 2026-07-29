@@ -10,6 +10,7 @@ def run(df, period=14, overbought=70, oversold=30):
     rsi_series = ta.momentum.RSIIndicator(out["close"], window=period).rsi()
     out["rsi"] = rsi_series
     sig = []
+    # level rules - not crossover; can fire many days in a row while stuck in a band
     for v in rsi_series:
         if pd.isna(v):
             sig.append(0)  # warmup bars before rsi exists

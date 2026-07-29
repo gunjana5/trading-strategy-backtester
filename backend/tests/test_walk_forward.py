@@ -36,9 +36,11 @@ def test_single_split_zeros_train_signals():
 
 
 def test_walk_forward_produces_folds():
+    # longer series so 3 expanding folds actually fit
     df, meta = run_walk_forward(_ohlcv(260), n_folds=3, min_train_rows=80)
     assert meta["mode"] == "walk_forward"
     assert meta["n_folds"] >= 2
     assert len(meta["folds"]) >= 2
     assert "mean_oos_accuracy" in meta
+    # at least one oos bar should have a non-zero signal
     assert (df["signal"].abs() > 0).any()

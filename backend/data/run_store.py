@@ -44,6 +44,7 @@ def _connect() -> sqlite3.Connection:
         conn.execute("ALTER TABLE backtest_runs ADD COLUMN equity_json TEXT")
     if "buy_hold_json" not in cols:
         conn.execute("ALTER TABLE backtest_runs ADD COLUMN buy_hold_json TEXT")
+    # indexes for the sidebar filters
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_runs_ticker ON backtest_runs(ticker)"
     )
@@ -66,6 +67,7 @@ def save_run(
     equity_curve: list | None = None,
     buy_hold_curve: list | None = None,
 ) -> int:
+    # headline metrics as columns; fat blobs as json text
     with _connect() as conn:
         cur = conn.execute(
             """
@@ -98,6 +100,7 @@ def save_run(
 
 
 def _row_to_summary(row: sqlite3.Row) -> dict:
+    # list view - no equity curves yet (those come from get_run)
     return {
         "id": row["id"],
         "created_at": row["created_at"],
@@ -134,6 +137,7 @@ def list_runs(
     where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
     args.append(limit)
     with _connect() as conn:
+        # newest first - historyKey bumps reload after each run
         rows = conn.execute(
             f"""
             SELECT id, created_at, ticker, start_date, end_date, strategy, params_json,
@@ -164,6 +168,7 @@ def get_run(run_id: int) -> dict | None:
     if row is None:
         return None
     out = _row_to_summary(row)
+    # attach curves only on detail fetch - list stays light
     out["equity_curve"] = json.loads(row["equity_json"]) if row["equity_json"] else None
     out["buy_hold_curve"] = json.loads(row["buy_hold_json"]) if row["buy_hold_json"] else None
     return out
@@ -181,6 +186,7 @@ def update_run_note(run_id: int, note: str) -> dict | None:
         ).fetchone()
         if row is None:
             return None
+        # merge - keep folds / trades / risk already in meta
         meta = json.loads(row["meta_json"] or "{}")
         meta["desk_note"] = note
         conn.execute(

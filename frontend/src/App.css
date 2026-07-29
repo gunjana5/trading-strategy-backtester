@@ -1,6 +1,7 @@
 /* shell layout + wonky stamps / grid wash */
 .app-shell {
   display: grid;
+  /* fixed left rail, fluid desk on the right */
   grid-template-columns: minmax(300px, 360px) 1fr;
   min-height: 100%;
   background:

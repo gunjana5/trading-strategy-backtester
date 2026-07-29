@@ -10,6 +10,7 @@ from data import run_store
 
 
 def test_update_run_note(tmp_path, monkeypatch):
+    # point store at a temp db so we dont touch the real backtest_runs.db
     db = tmp_path / "runs.db"
     monkeypatch.setattr(run_store, "_DB_PATH", db)
     rid = run_store.save_run(
@@ -37,6 +38,7 @@ def test_update_run_note(tmp_path, monkeypatch):
 
 
 def test_metric_row_shape_from_engine():
+    # engine should always hand back a trades list even for a tiny path
     idx = pd.date_range("2024-01-01", periods=3, freq="D")
     df = pd.DataFrame({"close": [100, 105, 110], "signal": [1, 0, -1]}, index=idx)
     bt = backtest(df, initial_capital=1000)

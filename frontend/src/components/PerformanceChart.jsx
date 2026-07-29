@@ -44,6 +44,7 @@ export default function PerformanceChart({
   showZeroCost,
   oosWindow,
 }) {
+  // only merge zero-cost when the toggle is on - keeps the series lean
   const data = mergeCurves(equityCurve, buyHoldCurve, showZeroCost ? zeroCostEquity : null);
   const uid = "perf-grad";
   const oosStart = oosWindow?.oos_start;
@@ -124,6 +125,7 @@ export default function PerformanceChart({
             />
             {oosStart && (
               <>
+                {/* shade the in-sample region so oos is visually obvious */}
                 <ReferenceArea
                   x1={data[0]?.date}
                   x2={oosStart}
@@ -145,6 +147,7 @@ export default function PerformanceChart({
                 />
               </>
             )}
+            {/* draw benchmark under strategy so mint sits on top */}
             <Area
               type="monotone"
               dataKey="benchmark"

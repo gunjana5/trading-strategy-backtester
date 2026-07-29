@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // /api goes to flask in dev so no cors headache
       "/api": {
         target: "http://127.0.0.1:5050", // airplay steals 5000 on macos
         changeOrigin: true,

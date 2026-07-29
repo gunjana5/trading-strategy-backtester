@@ -56,7 +56,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  position: sticky;
+  position: sticky; /* header stays put while scrolling the blotter */
   top: 0;
   background: var(--slate);
   font-family: var(--font-display);

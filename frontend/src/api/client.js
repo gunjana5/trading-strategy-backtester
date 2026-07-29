@@ -7,6 +7,7 @@ function apiUrl(path) {
 }
 
 async function parseJson(res) {
+  // read as text first so a non-json 500 still gives a useful error
   const text = await res.text();
   let data;
   try {
@@ -47,6 +48,7 @@ export async function fetchTickers() {
 }
 
 export async function runBacktest(config) {
+  // POST body = full strategy + cost payload from StrategySelector
   try {
     const res = await fetch(apiUrl("/api/backtest"), {
       method: "POST",
@@ -73,6 +75,7 @@ export async function fetchRuns({ limit = 20, ticker, strategy } = {}) {
 }
 
 export async function fetchRun(runId) {
+  // detail endpoint includes equity curves
   try {
     const res = await fetch(apiUrl(`/api/runs/${runId}`));
     return await parseJson(res);
@@ -95,6 +98,7 @@ export async function runCompare(config) {
 }
 
 export async function saveRunNote(runId, note) {
+  // PATCH so we dont invent a separate resource just for a string
   try {
     const res = await fetch(apiUrl(`/api/runs/${runId}/note`), {
       method: "PATCH",

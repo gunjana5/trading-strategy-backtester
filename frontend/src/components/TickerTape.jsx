@@ -14,6 +14,7 @@ const ITEMS = [
 ];
 
 export default function TickerTape() {
+  // duplicate the list so the css -50% scroll loops without a gap
   const line = [...ITEMS, ...ITEMS].map((t, i) => (
     <span key={`${t}-${i}`} className="tape-item">
       <span className="tape-dot" aria-hidden />

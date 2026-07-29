@@ -25,6 +25,7 @@ export default function SiteHelp() {
   const dismissWelcome = () => {
     setWelcome(false);
     try {
+      // remember so we dont nag on every reload
       localStorage.setItem(WELCOME_KEY, "1");
     } catch {
       /* ignore */

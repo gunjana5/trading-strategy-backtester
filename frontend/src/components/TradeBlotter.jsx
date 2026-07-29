@@ -88,6 +88,7 @@ export default function TradeBlotter({ trades }) {
           </thead>
           <tbody>
             {rows.map((t, i) => {
+              // colour pnl cell from the sign of the closed trade
               const pnl = Number(t.pnl_pct);
               const tone = pnl > 0 ? "good" : pnl < 0 ? "bad" : "neutral";
               return (

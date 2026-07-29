@@ -12,16 +12,18 @@ import TickerTape from "./components/TickerTape.jsx";
 import "./App.css";
 
 export default function App() {
+  // results OR compare - mutually cleared so the desk shows one mode at a time
   const [results, setResults] = useState(null);
   const [compare, setCompare] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // bump to force RunHistory to refetch after a successful run
   const [historyKey, setHistoryKey] = useState(0);
 
   const handleRun = useCallback(async (config) => {
     setLoading(true);
     setError(null);
-    setCompare(null);
+    setCompare(null); // leave compare mode
     try {
       const data = await runBacktest(config);
       setResults(data);
@@ -37,7 +39,7 @@ export default function App() {
   const handleCompare = useCallback(async (config) => {
     setLoading(true);
     setError(null);
-    setResults(null);
+    setResults(null); // leave single-run mode
     try {
       const data = await runCompare(config);
       setCompare(data);
@@ -50,6 +52,7 @@ export default function App() {
   }, []);
 
   const handleSelectRun = useCallback((row) => {
+    // reopen from history - same shape as a fresh backtest response
     setCompare(null);
     setResults(row);
   }, []);

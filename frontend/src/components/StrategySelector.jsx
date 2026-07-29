@@ -43,6 +43,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
   const [formErr, setFormErr] = useState(null);
 
   useEffect(() => {
+    // default window: last two years ending today
     const today = new Date();
     const twoYearsAgo = new Date();
     twoYearsAgo.setFullYear(today.getFullYear() - 2);
@@ -68,6 +69,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
   }, []);
 
   const params = useMemo(() => {
+    // cost knobs always travel with strategy knobs
     const base = {
       commission_bps: commissionBps,
       slippage_bps: slippageBps,
@@ -98,6 +100,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
     positionSizePct,
   ]);
 
+  // body shape the flask /api/backtest + /api/compare endpoints expect
   const buildPayload = () => ({
     ticker,
     start,
@@ -112,6 +115,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
   });
 
   const validate = () => {
+    // cheap client-side checks before we spend a round trip
     setFormErr(null);
     if (strategy === "moving_average_crossover" && fast >= slow) {
       setFormErr("fast period must be smaller than slow period");
@@ -140,6 +144,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
     onCompare?.(buildPayload());
   };
 
+  // which strategy-specific sliders to show
   const showMa = strategy === "moving_average_crossover";
   const showRsi = strategy === "rsi_strategy";
   const showMl = strategy === "ml_signal";

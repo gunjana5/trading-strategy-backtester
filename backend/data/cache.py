@@ -39,9 +39,10 @@ def get_cached_ohlcv(ticker: str, start: str, end: str) -> pd.DataFrame | None:
     if not row:
         return None
     fetched_at = datetime.fromisoformat(row[0])
-    # expired → caller hits yahoo again
+    # expired - caller hits yahoo again
     if datetime.now(timezone.utc) - fetched_at.replace(tzinfo=timezone.utc) > _TTL:
         return None
+    # json to dataframe; index stored separately because records lose it
     payload = json.loads(row[1])
     df = pd.DataFrame(payload["rows"])
     df.index = pd.to_datetime(payload["index"])
@@ -50,6 +51,7 @@ def get_cached_ohlcv(ticker: str, start: str, end: str) -> pd.DataFrame | None:
 
 def set_cached_ohlcv(ticker: str, start: str, end: str, df: pd.DataFrame) -> None:
     key = _cache_key(ticker, start, end)
+    # flatten so sqlite just stores text - rebuild on read
     payload = {
         "index": [str(i) for i in df.index],
         "rows": df.reset_index(drop=True).to_dict(orient="records"),

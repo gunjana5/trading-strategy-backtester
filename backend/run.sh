@@ -7,6 +7,7 @@ if [[ ! -d .venv ]]; then
 fi
 # shellcheck source=/dev/null
 source .venv/bin/activate
+# -q keeps the install noise down on every restart
 python -m pip install -r requirements.txt -q
 # exec replaces this shell so ctrl+c hits flask cleanly
 exec python app.py

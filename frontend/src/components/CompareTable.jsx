@@ -18,6 +18,7 @@ function fmtPct(n) {
 export default function CompareTable({ data }) {
   if (!data?.rows?.length) return null;
   const { ticker, start, end, costs, rows } = data;
+  // highlight the strategy with the best total return (ties ok)
   const bestReturn = rows.reduce((best, r) => {
     const v = Number(r.total_return);
     if (Number.isNaN(v)) return best;

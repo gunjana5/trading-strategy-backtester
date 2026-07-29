@@ -25,6 +25,7 @@ export default function RunHistory({ onSelect, refreshKey }) {
   }, []);
 
   useEffect(() => {
+    // refreshKey changes after each successful backtest
     load();
   }, [load, refreshKey]);
 
@@ -43,6 +44,7 @@ export default function RunHistory({ onSelect, refreshKey }) {
         price_series: [], // not stored - signal chart stays empty on reopen
         total_return: row.total_return,
         sharpe_ratio: row.sharpe_ratio,
+        // extras were stuffed into meta at save time
         sortino_ratio: row.meta?.metrics_extra?.sortino_ratio,
         max_drawdown: row.max_drawdown,
         win_rate: row.win_rate,

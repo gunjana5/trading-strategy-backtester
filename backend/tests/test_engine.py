@@ -6,11 +6,13 @@ from backtester.engine import backtest, buy_hold_curve
 
 
 def _series(prices, signals):
+    # tiny helper so each test stays a one-liner of prices + signals
     idx = pd.date_range("2024-01-01", periods=len(prices), freq="D")
     return pd.DataFrame({"close": prices, "signal": signals}, index=idx)
 
 
 def test_backtest_buy_then_sell_profit():
+    # buy day 1, hold, sell day 3 - expect ~+10%
     df = _series([100, 105, 110], [1, 0, -1])
     result = backtest(df, initial_capital=1000)
     assert result["num_trades"] == 1
@@ -39,6 +41,7 @@ def test_backtest_win_rate_all_wins():
 
 
 def test_buy_hold_curve_tracks_price():
+    # 100 to 121 is +21%, so £1000 should mark ~1210
     df = _series([100, 110, 121], [0, 0, 0])
     curve = buy_hold_curve(df, initial_capital=1000)
     assert len(curve) == 3
@@ -52,6 +55,7 @@ def test_backtest_equity_curve_length():
 
 
 def test_commission_reduces_return():
+    # 50 bps each side should clearly beat zero-fee on the same path
     df = _series([100, 110], [1, -1])
     clean = backtest(df, initial_capital=1000, commission_bps=0, slippage_bps=0)
     costly = backtest(df, initial_capital=1000, commission_bps=50, slippage_bps=0)
