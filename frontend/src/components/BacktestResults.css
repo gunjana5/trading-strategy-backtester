@@ -37,6 +37,13 @@
   gap: 1rem;
 }
 
+.signal-missing {
+  font-size: 0.72rem;
+  color: var(--quiet);
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
 .fade-in {
   animation: fadeIn 0.55s ease-out both;
 }

@@ -49,6 +49,8 @@ export default function BacktestResults({ data }) {
 
   // note may live top-level (fresh run) or nested in meta (reopened)
   const note = deskNote || meta?.desk_note || "";
+  const hasPriceSeries = Array.isArray(priceSeries) && priceSeries.length > 0;
+  const hasZeroCost = Array.isArray(equityZero) && equityZero.length > 0;
 
   return (
     <section className="results-root fade-in">
@@ -135,23 +137,25 @@ export default function BacktestResults({ data }) {
         </div>
       )}
 
-      <label className="cost-toggle">
-        <input
-          type="checkbox"
-          checked={showZeroCost}
-          onChange={(e) => setShowZeroCost(e.target.checked)}
-        />
-        <span className="label-row">
-          show zero-cost overlay
-          <InfoTip text="draws a fantasy curve with fees set to zero so you can see if costs ate the edge" />
-          {zeroCost != null && (
-            <em>
-              {" "}
-              (with costs {totalReturn?.toFixed?.(1)}% vs zero {zeroCost.total_return?.toFixed?.(1)}%)
-            </em>
-          )}
-        </span>
-      </label>
+      {hasZeroCost ? (
+        <label className="cost-toggle">
+          <input
+            type="checkbox"
+            checked={showZeroCost}
+            onChange={(e) => setShowZeroCost(e.target.checked)}
+          />
+          <span className="label-row">
+            show zero-cost overlay
+            <InfoTip text="draws a fantasy curve with fees set to zero so you can see if costs ate the edge" />
+            {zeroCost != null && (
+              <em>
+                {" "}
+                (with costs {totalReturn?.toFixed?.(1)}% vs zero {zeroCost.total_return?.toFixed?.(1)}%)
+              </em>
+            )}
+          </span>
+        </label>
+      ) : null}
 
       <RiskMetrics
         totalReturn={totalReturn}
@@ -170,8 +174,8 @@ export default function BacktestResults({ data }) {
         <PerformanceChart
           equityCurve={equityCurve}
           buyHoldCurve={buyHoldCurve}
-          zeroCostEquity={equityZero}
-          showZeroCost={showZeroCost}
+          zeroCostEquity={hasZeroCost ? equityZero : null}
+          showZeroCost={hasZeroCost && showZeroCost}
           oosWindow={
             oosWindow ||
             (validation?.folds?.[0]
@@ -185,7 +189,13 @@ export default function BacktestResults({ data }) {
               : null)
           }
         />
-        <SignalChart priceSeries={priceSeries} />
+        {hasPriceSeries ? (
+          <SignalChart priceSeries={priceSeries} />
+        ) : (
+          <p className="signal-missing">
+            no price series stored for this run - re-run to refresh signal chart
+          </p>
+        )}
       </div>
       <TradeBlotter trades={trades} />
       <DeskNote runId={runId} initialNote={note} />

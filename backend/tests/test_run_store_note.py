@@ -37,6 +37,42 @@ def test_update_run_note(tmp_path, monkeypatch):
     assert row["meta"]["desk_note"] == "costs ate the edge"
 
 
+def test_meta_round_trips_price_series(tmp_path, monkeypatch):
+    # reopen from history needs price_series still inside meta_json
+    db = tmp_path / "runs.db"
+    monkeypatch.setattr(run_store, "_DB_PATH", db)
+    series = [{"date": "2024-01-02", "close": 101.5, "signal": 1}]
+    rid = run_store.save_run(
+        created_at="2026-01-01T00:00:00Z",
+        ticker="MSFT",
+        start_date="2024-01-01",
+        end_date="2024-06-01",
+        strategy="rsi",
+        params={},
+        metrics={
+            "total_return": 2.0,
+            "sharpe_ratio": 0.4,
+            "max_drawdown": 3.0,
+            "win_rate": 55.0,
+            "num_trades": 2,
+            "total_costs": 0.2,
+        },
+        meta={
+            "price_series": series,
+            "equity_curve_zero_cost": [{"date": "2024-01-02", "value": 100}],
+            "buy_hold_curve_zero_cost": [{"date": "2024-01-02", "value": 100}],
+            "zero_cost": {"total_return": 2.5, "sharpe_ratio": 0.5},
+        },
+        equity_curve=[{"date": "2024-01-02", "value": 99}],
+        buy_hold_curve=[{"date": "2024-01-02", "value": 100}],
+    )
+    row = run_store.get_run(rid)
+    assert row is not None
+    assert row["meta"]["price_series"] == series
+    assert row["meta"]["zero_cost"]["total_return"] == 2.5
+    assert len(row["meta"]["equity_curve_zero_cost"]) == 1
+
+
 def test_metric_row_shape_from_engine():
     # engine should always hand back a trades list even for a tiny path
     idx = pd.date_range("2024-01-01", periods=3, freq="D")

@@ -9,12 +9,18 @@ export default function RunHistory({ onSelect, refreshKey }) {
   const [runs, setRuns] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [tickerFilter, setTickerFilter] = useState("");
+  const [strategyFilter, setStrategyFilter] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchRuns({ limit: 12 });
+      const data = await fetchRuns({
+        limit: 12,
+        ticker: tickerFilter.trim() || undefined,
+        strategy: strategyFilter || undefined,
+      });
       setRuns(data.runs || []);
     } catch (e) {
       setError(e?.message || "could not load runs");
@@ -22,7 +28,7 @@ export default function RunHistory({ onSelect, refreshKey }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tickerFilter, strategyFilter]);
 
   useEffect(() => {
     // refreshKey changes after each successful backtest
@@ -36,35 +42,39 @@ export default function RunHistory({ onSelect, refreshKey }) {
         setError("this older run has no stored equity curve - re-run to refresh history");
         return;
       }
+      const meta = row.meta || {};
       // reshape sqlite row into the same shape as a fresh /api/backtest response
       onSelect?.({
         run_id: row.id,
         equity_curve: row.equity_curve,
         buy_hold_curve: row.buy_hold_curve || [],
-        price_series: [], // not stored - signal chart stays empty on reopen
+        price_series: meta.price_series || [],
+        equity_curve_zero_cost: meta.equity_curve_zero_cost || null,
+        buy_hold_curve_zero_cost: meta.buy_hold_curve_zero_cost || null,
+        zero_cost: meta.zero_cost || null,
         total_return: row.total_return,
         sharpe_ratio: row.sharpe_ratio,
         // extras were stuffed into meta at save time
-        sortino_ratio: row.meta?.metrics_extra?.sortino_ratio,
+        sortino_ratio: meta.metrics_extra?.sortino_ratio,
         max_drawdown: row.max_drawdown,
         win_rate: row.win_rate,
-        avg_win_pct: row.meta?.metrics_extra?.avg_win_pct,
-        avg_loss_pct: row.meta?.metrics_extra?.avg_loss_pct,
-        time_in_market: row.meta?.metrics_extra?.time_in_market,
-        profit_factor: row.meta?.metrics_extra?.profit_factor,
+        avg_win_pct: meta.metrics_extra?.avg_win_pct,
+        avg_loss_pct: meta.metrics_extra?.avg_loss_pct,
+        time_in_market: meta.metrics_extra?.time_in_market,
+        profit_factor: meta.metrics_extra?.profit_factor,
         num_trades: row.num_trades,
         total_costs: row.total_costs,
-        trades: row.meta?.trades || [],
-        validation: row.meta?.validation || null,
-        oos_window: row.meta?.oos_window || null,
-        halted: row.meta?.risk?.halted || false,
-        halt_reason: row.meta?.risk?.halt_reason || null,
-        stop_exits: row.meta?.risk?.stop_exits || 0,
+        trades: meta.trades || [],
+        validation: meta.validation || null,
+        oos_window: meta.oos_window || null,
+        halted: meta.risk?.halted || false,
+        halt_reason: meta.risk?.halt_reason || null,
+        stop_exits: meta.risk?.stop_exits || 0,
         commission_bps: row.params?.commission_bps,
         slippage_bps: row.params?.slippage_bps,
-        position_size_pct: row.params?.position_size_pct ?? row.meta?.costs?.position_size_pct,
-        desk_note: row.meta?.desk_note || "",
-        meta: row.meta || {},
+        position_size_pct: row.params?.position_size_pct ?? meta.costs?.position_size_pct,
+        desk_note: meta.desk_note || "",
+        meta,
       });
     } catch (e) {
       setError(e?.message || "could not open run");
@@ -81,6 +91,27 @@ export default function RunHistory({ onSelect, refreshKey }) {
         <button type="button" className="ghost-btn" onClick={load} disabled={loading}>
           refresh
         </button>
+      </div>
+      <div className="run-history-filters">
+        <input
+          type="text"
+          className="run-filter-input"
+          placeholder="ticker"
+          value={tickerFilter}
+          onChange={(e) => setTickerFilter(e.target.value)}
+          aria-label="filter by ticker"
+        />
+        <select
+          className="run-filter-select"
+          value={strategyFilter}
+          onChange={(e) => setStrategyFilter(e.target.value)}
+          aria-label="filter by strategy"
+        >
+          <option value="">all</option>
+          <option value="ma">ma</option>
+          <option value="rsi">rsi</option>
+          <option value="ml">ml</option>
+        </select>
       </div>
       {error && <div className="run-history-err">{error}</div>}
       {!runs.length && !loading && <p className="run-history-empty">no saved runs yet</p>}

@@ -216,7 +216,15 @@ def api_backtest():
             "initial_capital": costs["initial_capital"],
             "position_size_pct": costs["position_size_pct"],
         }
-        # blob the ui needs later - trades / risk / extra metrics live in meta_json
+        # blob the ui needs later - trades / risk / charts live in meta_json
+        zero_cost = {
+            "total_return": bt_zero["total_return"],
+            "sharpe_ratio": bt_zero["sharpe_ratio"],
+            "max_drawdown": bt_zero["max_drawdown"],
+            "win_rate": bt_zero["win_rate"],
+            "num_trades": bt_zero["num_trades"],
+            "total_costs": bt_zero.get("total_costs", 0),
+        }
         meta = {
             "validation": validation,
             "oos_window": oos,
@@ -242,6 +250,11 @@ def api_backtest():
                 "time_in_market": bt.get("time_in_market"),
                 "profit_factor": bt.get("profit_factor"),
             },
+            # so reopen from history can redraw signal chart + zero-cost overlay
+            "price_series": series,
+            "equity_curve_zero_cost": bt_zero["equity_curve"],
+            "buy_hold_curve_zero_cost": bh_zero,
+            "zero_cost": zero_cost,
             "storage": (
                 "sqlite run history on purpose - fine for a single-user demo. "
                 "postgres would only matter if multiple people hit this at once."
@@ -272,14 +285,7 @@ def api_backtest():
             "buy_hold_curve": bh,
             "equity_curve_zero_cost": bt_zero["equity_curve"],
             "buy_hold_curve_zero_cost": bh_zero,
-            "zero_cost": {
-                "total_return": bt_zero["total_return"],
-                "sharpe_ratio": bt_zero["sharpe_ratio"],
-                "max_drawdown": bt_zero["max_drawdown"],
-                "win_rate": bt_zero["win_rate"],
-                "num_trades": bt_zero["num_trades"],
-                "total_costs": bt_zero.get("total_costs", 0),
-            },
+            "zero_cost": zero_cost,
             "price_series": series,
             "total_return": bt["total_return"],
             "sharpe_ratio": bt["sharpe_ratio"],
