@@ -25,3 +25,26 @@ def run(df, fast=20, slow=50):
             sig[i] = 0
     out["signal"] = sig
     return out
+
+
+def sensitivity_grid(df, fast_slow_pairs):
+    # offline sweep - not wired to the ui. same fast < slow rule as app.py
+    rows = []
+    for fast, slow in fast_slow_pairs:
+        fast = int(fast)
+        slow = int(slow)
+        if fast >= slow:
+            raise ValueError("fast period must be smaller than slow period")
+        if fast < 2 or slow < 3:
+            raise ValueError("moving average periods must be at least 2 and 3")
+        out = run(df, fast=fast, slow=slow)
+        sig = out["signal"]
+        rows.append(
+            {
+                "fast": fast,
+                "slow": slow,
+                "buy_signals": int((sig == 1).sum()),
+                "sell_signals": int((sig == -1).sum()),
+            }
+        )
+    return rows

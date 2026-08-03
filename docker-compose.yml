@@ -1,0 +1,16 @@
+# local stack - same ports as ./run.sh. api needs network for yahoo.
+services:
+  api:
+    build: ./backend
+    ports:
+      - "5050:5050"
+  web:
+    build:
+      context: ./frontend
+      args:
+        # browser on the host talks to published api port
+        VITE_API_URL: http://localhost:5050
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api

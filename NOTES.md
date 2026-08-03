@@ -55,12 +55,14 @@ moving average - signal only on the cross day (fast above slow = 1, below = -1).
 
 rsi - ta library. below oversold = 1, above overbought = -1. rule-based not a crossover detector, so you can get chop around the bands. conscious simplicity tradeoff
 
-ml - features: rsi, sma 20/50, macd, volume pct change, 1d/5d returns. label = next day return > 0.5%. default in the ui is walk_forward=true (expanding train window, trade only oos blocks). single 70/30 split still available. train / past bars get signal 0 so we don't pretend we had a model before it existed. model retrains every api call, nothing saved to disk. joblib is in requirements mostly because sklearn expects it
+ml - strategies/ml_strategy.py is just a thin facade so app.py has one import. the real work (features, labels, train/predict, expanding folds) is in backtester/walk_forward.py. features: rsi, sma 20/50, macd, volume pct change, 1d/5d returns. label = next day return > 0.5%. default in the ui is walk_forward=true (expanding train window, trade only oos blocks). single 70/30 split still available. train / past bars get signal 0 so we don't pretend we had a model before it existed. model retrains every api call, nothing saved to disk. joblib is in requirements mostly because sklearn expects it
 
 
 walk-forward (backtester/walk_forward.py)
 
 expanding window: fold k trains on [0 .. test_start), predicts the next block. n_folds 2-8. fold oos accuracies + mean go into validation meta for the honesty banner. if folds disagree wildly, treat the run as unstable. still paper - doesn't invent edge
+
+ma sensitivity - strategies/moving_average.sensitivity_grid for offline fast/slow sweeps (signal counts). not in the ui or api; use from a notebook/pytest if you want to poke params
 
 
 costs (defaults 5/5 bps)

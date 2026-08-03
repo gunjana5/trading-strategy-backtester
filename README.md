@@ -11,9 +11,11 @@ trading-strategy-backtester/
   README.md
   NOTES.md           # scratch for future me
   run.sh             # flask + vite together
+  docker-compose.yml # api + ui containers
   backend/           # flask api + strategies + engine
   backend/Dockerfile
   frontend/          # react vite ui
+  frontend/Dockerfile
   backend/tests/
 ```
 
@@ -24,6 +26,14 @@ trading-strategy-backtester/
 ```
 
 Starts Flask on :5050 and the Vite UI on :5173 (opens the browser).
+
+Or with Docker (api needs network for Yahoo):
+
+```bash
+docker compose up --build
+```
+
+UI on http://localhost:5173, API on http://localhost:5050 (browser calls the API via `VITE_API_URL`).
 
 Or manually:
 
@@ -78,7 +88,8 @@ UI posts ticker / dates / strategy / costs -> Flask fetches (or hits the 24h cac
 - **compare mode** - same ticker/dates/costs, MA vs RSI vs ML in one table
 - **desk note** on a run - short judgment line you save after looking at the charts
 - **csv export** - metrics + trades download
-- ML path: **OOS only** badge + train/test date labels on the chart; walk-forward fold table
+- ML path: **OOS only** badge + train/test date labels on the chart; walk-forward fold table (`ml_strategy` is a thin wrapper - train/predict lives in `walk_forward`)
+- MA `sensitivity_grid` helper for offline fast/slow sweeps (not in the UI)
 - run history in SQLite - click a past run and reload the curves
 - strategies stay dumb: they only emit `1 / -1 / 0`; the engine owns fills and risk
 
@@ -88,9 +99,10 @@ UI posts ticker / dates / strategy / costs -> Flask fetches (or hits the 24h cac
 - daily close fills - ignores intraday path; real fills differ
 - simple cost model - constant bps, not venue fees or impact
 - long-only - no shorts or multi-name portfolio; sizing is % of cash per entry
-- ML is a toy classifier (label ~= next day up > 0.5%); walk-forward helps, doesn't erase overfitting
+- ML is a toy classifier (label ~= next day up > 0.5%); walk-forward helps, doesn't erase overfitting. `strategies/ml_strategy.py` is only the app-facing facade
 - Yahoo data - free delayed/adjusted history; gaps and adjustments happen
 - **SQLite on purpose** for run history - single-user demo. Postgres would only matter if many people hit this at once; not worth the ops overhead here.
+
 
 ## tests
 
