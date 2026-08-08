@@ -1,21 +1,21 @@
 // costs toggle: with fees vs fantasy zero-cost on the same signals
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { downloadRunCsv } from "../lib/exportCsv.js";
 import DeskNote from "./DeskNote.jsx";
 import InfoTip from "./InfoTip.jsx";
-import PerformanceChart from "./PerformanceChart.jsx";
 import RiskMetrics from "./RiskMetrics.jsx";
-import SignalChart from "./SignalChart.jsx";
 import TradeBlotter from "./TradeBlotter.jsx";
 import "./BacktestResults.css";
 
+// recharts is chunky - load charts only when results exist
+const PerformanceChart = lazy(() => import("./PerformanceChart.jsx"));
+const SignalChart = lazy(() => import("./SignalChart.jsx"));
+
 export default function BacktestResults({ data }) {
-  // overlay fantasy zero-fee equity on the same chart
   const [showZeroCost, setShowZeroCost] = useState(false);
 
   if (!data) return null;
-  // rename snake_case api fields once so the jsx reads cleaner
   const {
     equity_curve: equityCurve,
     buy_hold_curve: buyHoldCurve,
@@ -35,22 +35,25 @@ export default function BacktestResults({ data }) {
     trades,
     validation,
     oos_window: oosWindow,
+    oos_metrics: oosMetrics,
     halted,
     halt_reason: haltReason,
     stop_exits: stopExits,
     commission_bps: commissionBps,
     slippage_bps: slippageBps,
     position_size_pct: positionSizePct,
+    fill_timing: fillTiming,
+    allow_short: allowShort,
     run_id: runId,
     zero_cost: zeroCost,
     desk_note: deskNote,
     meta,
   } = data;
 
-  // note may live top-level (fresh run) or nested in meta (reopened)
   const note = deskNote || meta?.desk_note || "";
   const hasPriceSeries = Array.isArray(priceSeries) && priceSeries.length > 0;
   const hasZeroCost = Array.isArray(equityZero) && equityZero.length > 0;
+  const oos = oosMetrics || meta?.oos_metrics;
 
   return (
     <section className="results-root fade-in">
@@ -63,7 +66,8 @@ export default function BacktestResults({ data }) {
         </span>
         <span className="subtle">
           paper only · costs {commissionBps ?? 0}/{slippageBps ?? 0} bps · size{" "}
-          {positionSizePct ?? 100}% · signals use past rows only
+          {positionSizePct ?? 100}% · fill {fillTiming || "next_bar"}
+          {allowShort ? " · shorts on" : ""} · signals use past rows only
         </span>
         <button
           type="button"
@@ -97,9 +101,23 @@ export default function BacktestResults({ data }) {
             <span>
               {" "}
               · traded from {oosWindow.oos_start}
-              {oosWindow.oos_end ? ` → ${oosWindow.oos_end}` : ""}
+              {oosWindow.oos_end ? ` -> ${oosWindow.oos_end}` : ""}
             </span>
           )}
+        </div>
+      )}
+
+      {oos && (
+        <div className="oos-metrics" role="note">
+          <span className="label-row">
+            <strong>oos metrics</strong>
+            <InfoTip text="rebasing from the first out-of-sample bar so flat in-sample equity does not dominate" />
+          </span>
+          <span>
+            return {oos.total_return?.toFixed?.(1)}% · sharpe {oos.sharpe_ratio?.toFixed?.(2)} ·
+            sortino {oos.sortino_ratio?.toFixed?.(2)} · max dd {oos.max_drawdown?.toFixed?.(1)}% ·
+            win {oos.win_rate?.toFixed?.(0)}% · trades {oos.num_trades}
+          </span>
         </div>
       )}
 
@@ -126,9 +144,7 @@ export default function BacktestResults({ data }) {
                 <tr key={f.fold}>
                   <td>{f.fold}</td>
                   <td>{f.train_end}</td>
-                  <td>
-                    {f.test_start} → {f.test_end}
-                  </td>
+                  <td>{`${f.test_start} -> ${f.test_end}`}</td>
                   <td>{((f.oos_accuracy ?? 0) * 100).toFixed(1)}%</td>
                 </tr>
               ))}
@@ -171,31 +187,32 @@ export default function BacktestResults({ data }) {
         totalCosts={totalCosts}
       />
       <div className="charts-stack">
-        <PerformanceChart
-          equityCurve={equityCurve}
-          buyHoldCurve={buyHoldCurve}
-          zeroCostEquity={hasZeroCost ? equityZero : null}
-          showZeroCost={hasZeroCost && showZeroCost}
-          oosWindow={
-            oosWindow ||
-            (validation?.folds?.[0]
-              ? {
-                  // rebuild a rough window if the api only sent folds
-                  oos_start: validation.folds[0].test_start,
-                  train_end: validation.folds[0].train_end,
-                  oos_end: validation.folds[validation.folds.length - 1].test_end,
-                  label: "OOS only",
-                }
-              : null)
-          }
-        />
-        {hasPriceSeries ? (
-          <SignalChart priceSeries={priceSeries} />
-        ) : (
-          <p className="signal-missing">
-            no price series stored for this run - re-run to refresh signal chart
-          </p>
-        )}
+        <Suspense fallback={<p className="chart-loading">loading charts…</p>}>
+          <PerformanceChart
+            equityCurve={equityCurve}
+            buyHoldCurve={buyHoldCurve}
+            zeroCostEquity={hasZeroCost ? equityZero : null}
+            showZeroCost={hasZeroCost && showZeroCost}
+            oosWindow={
+              oosWindow ||
+              (validation?.folds?.[0]
+                ? {
+                    oos_start: validation.folds[0].test_start,
+                    train_end: validation.folds[0].train_end,
+                    oos_end: validation.folds[validation.folds.length - 1].test_end,
+                    label: "OOS only",
+                  }
+                : null)
+            }
+          />
+          {hasPriceSeries ? (
+            <SignalChart priceSeries={priceSeries} />
+          ) : (
+            <p className="signal-missing">
+              no price series stored for this run - re-run to refresh signal chart
+            </p>
+          )}
+        </Suspense>
       </div>
       <TradeBlotter trades={trades} />
       <DeskNote runId={runId} initialNote={note} />

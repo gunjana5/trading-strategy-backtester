@@ -6,7 +6,7 @@ function apiUrl(path) {
   return BASE ? `${BASE}${p}` : p;
 }
 
-async function parseJson(res) {
+export async function parseJson(res) {
   // read as text first so a non-json 500 still gives a useful error
   const text = await res.text();
   let data;
@@ -22,7 +22,7 @@ async function parseJson(res) {
   return data;
 }
 
-function wrapNetworkError(err) {
+export function wrapNetworkError(err) {
   // browsers throw TypeError when fetch can't connect at all
   if (err instanceof TypeError || err?.name === "TypeError") {
     const hint =
@@ -75,9 +75,26 @@ export async function fetchRuns({ limit = 20, ticker, strategy } = {}) {
 }
 
 export async function fetchRun(runId) {
-  // detail endpoint includes equity curves
   try {
     const res = await fetch(apiUrl(`/api/runs/${runId}`));
+    return await parseJson(res);
+  } catch (e) {
+    wrapNetworkError(e);
+  }
+}
+
+export async function deleteRun(runId) {
+  try {
+    const res = await fetch(apiUrl(`/api/runs/${runId}`), { method: "DELETE" });
+    return await parseJson(res);
+  } catch (e) {
+    wrapNetworkError(e);
+  }
+}
+
+export async function clearRuns() {
+  try {
+    const res = await fetch(apiUrl("/api/runs"), { method: "DELETE" });
     return await parseJson(res);
   } catch (e) {
     wrapNetworkError(e);
@@ -97,8 +114,20 @@ export async function runCompare(config) {
   }
 }
 
+export async function runMaSensitivity(config) {
+  try {
+    const res = await fetch(apiUrl("/api/ma-sensitivity"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(config),
+    });
+    return await parseJson(res);
+  } catch (e) {
+    wrapNetworkError(e);
+  }
+}
+
 export async function saveRunNote(runId, note) {
-  // PATCH so we dont invent a separate resource just for a string
   try {
     const res = await fetch(apiUrl(`/api/runs/${runId}/note`), {
       method: "PATCH",

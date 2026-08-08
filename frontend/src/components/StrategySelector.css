@@ -194,3 +194,37 @@
   line-height: 1.4;
   color: var(--quiet);
 }
+
+.field .text-input {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.5rem 0.55rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
+.sens-btn {
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+
+.sens-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  margin-top: 0.35rem;
+}
+
+.sens-table th,
+.sens-table td {
+  border: 1px solid var(--line);
+  padding: 0.25rem 0.35rem;
+  text-align: right;
+}
+
+.sens-table th {
+  color: var(--muted);
+  font-weight: 600;
+}

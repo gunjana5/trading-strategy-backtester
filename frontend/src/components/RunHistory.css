@@ -125,3 +125,22 @@
 .run-history-err {
   color: var(--coral);
 }
+
+.run-history-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.run-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.run-row .run-item {
+  flex: 1;
+}
+
+.run-del {
+  flex-shrink: 0;
+}

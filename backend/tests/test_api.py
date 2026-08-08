@@ -217,3 +217,91 @@ def test_desk_note_too_long(client):
     res = client.patch(f"/api/runs/{run_id}/note", json={"note": "x" * 501})
     assert res.status_code == 400
     assert "500" in res.get_json()["error"]
+
+
+def test_ml_walk_forward_default_and_oos_fields(client):
+    # omit walk_forward - api default is true
+    res = client.post(
+        "/api/backtest",
+        json={
+            "ticker": "aapl",
+            "start": "2023-01-01",
+            "end": "2024-06-01",
+            "strategy": "ml",
+            "params": {"n_folds": 2},
+        },
+    )
+    assert res.status_code == 200, res.get_json()
+    body = res.get_json()
+    assert body.get("validation") is not None
+    assert body["validation"]["mode"] == "walk_forward"
+    assert body["validation"].get("folds")
+    assert body.get("oos_window") is not None
+    assert body["oos_window"].get("oos_start")
+    assert "oos_metrics" in body
+    assert "buy_hold_curve_zero_cost" not in body
+
+
+def test_bad_ticker_rejected(client):
+    res = client.post(
+        "/api/backtest",
+        json={
+            "ticker": "!!!",
+            "start": "2023-01-01",
+            "end": "2024-01-01",
+            "strategy": "ma",
+            "params": {"fast": 5, "slow": 15},
+        },
+    )
+    assert res.status_code == 400
+    assert "ticker" in res.get_json()["error"].lower()
+
+
+def test_delete_run_and_clear(client):
+    bt = client.post(
+        "/api/backtest",
+        json={
+            "ticker": "aapl",
+            "start": "2023-01-01",
+            "end": "2024-01-01",
+            "strategy": "ma",
+            "params": {"fast": 5, "slow": 15},
+        },
+    )
+    run_id = bt.get_json()["run_id"]
+    deleted = client.delete(f"/api/runs/{run_id}")
+    assert deleted.status_code == 200
+    missing = client.get(f"/api/runs/{run_id}")
+    assert missing.status_code == 404
+
+    client.post(
+        "/api/backtest",
+        json={
+            "ticker": "aapl",
+            "start": "2023-01-01",
+            "end": "2024-01-01",
+            "strategy": "ma",
+            "params": {"fast": 5, "slow": 15},
+        },
+    )
+    cleared = client.delete("/api/runs")
+    assert cleared.status_code == 200
+    assert cleared.get_json()["deleted"] >= 1
+    listed = client.get("/api/runs")
+    assert listed.get_json()["runs"] == []
+
+
+def test_ma_sensitivity_endpoint(client):
+    res = client.post(
+        "/api/ma-sensitivity",
+        json={
+            "ticker": "aapl",
+            "start": "2023-01-01",
+            "end": "2024-01-01",
+            "pairs": [[5, 20], [10, 30]],
+        },
+    )
+    assert res.status_code == 200, res.get_json()
+    body = res.get_json()
+    assert len(body["rows"]) == 2
+    assert "buy_signals" in body["rows"][0]

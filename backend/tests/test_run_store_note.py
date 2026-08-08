@@ -60,7 +60,6 @@ def test_meta_round_trips_price_series(tmp_path, monkeypatch):
         meta={
             "price_series": series,
             "equity_curve_zero_cost": [{"date": "2024-01-02", "value": 100}],
-            "buy_hold_curve_zero_cost": [{"date": "2024-01-02", "value": 100}],
             "zero_cost": {"total_return": 2.5, "sharpe_ratio": 0.5},
         },
         equity_curve=[{"date": "2024-01-02", "value": 99}],
@@ -77,6 +76,6 @@ def test_metric_row_shape_from_engine():
     # engine should always hand back a trades list even for a tiny path
     idx = pd.date_range("2024-01-01", periods=3, freq="D")
     df = pd.DataFrame({"close": [100, 105, 110], "signal": [1, 0, -1]}, index=idx)
-    bt = backtest(df, initial_capital=1000)
+    bt = backtest(df, initial_capital=1000, fill_timing="same_bar")
     assert "trades" in bt
     assert bt["num_trades"] == 1

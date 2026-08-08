@@ -1,13 +1,21 @@
 # pipeline lives in strategies + engine
 
+import re
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from backtester.engine import backtest, buy_hold_curve, price_signals_payload
+from backtester.engine import backtest, buy_hold_curve, oos_metrics_block, price_signals_payload
 from data.fetcher import fetch_ohlcv
-from data.run_store import get_run, list_runs, save_run, update_run_note
+from data.run_store import (
+    clear_runs,
+    delete_run,
+    get_run,
+    list_runs,
+    save_run,
+    update_run_note,
+)
 from strategies import ml_strategy, moving_average, rsi_strategy
 
 app = Flask(__name__)
@@ -36,12 +44,25 @@ TICKERS = [
     "brk-b",
 ]
 
+# yahoo-ish symbols: letters, digits, dot, hyphen, caret, equals
+_TICKER_RE = re.compile(r"^[A-Za-z0-9.\-^=]{1,32}$")
+
+
+def _normalize_ticker(raw) -> str:
+    if raw is None:
+        raise ValueError("ticker is required")
+    t = str(raw).strip().upper()
+    if not t or not _TICKER_RE.match(t):
+        raise ValueError(
+            "ticker must be 1-32 chars: letters, digits, '.', '-', '^', or '='"
+        )
+    return t
+
 
 def _normalize_strategy(name):
     # frontend sends long names; engine keys are short (ma/rsi/ml)
     if not name:
         return None
-    # squash spaces/hyphens so "rsi strategy" and "rsi_strategy" both land
     s = str(name).lower().strip().replace(" ", "_").replace("-", "_")
     aliases = {
         "moving_average_crossover": "ma",
@@ -61,14 +82,16 @@ def _cost_risk_from_body(body: dict) -> dict:
     params = body.get("params") or {}
 
     def pick(key, default):
-        # body wins over nested params when both are present
         if key in body and body[key] is not None:
             return body[key]
         if key in params and params[key] is not None:
             return params[key]
         return default
 
-    # 0 on the halt/stop sliders means off (None for the engine)
+    fill_timing = str(pick("fill_timing", "next_bar")).strip().lower()
+    if fill_timing not in ("next_bar", "same_bar"):
+        raise ValueError("fill_timing must be next_bar or same_bar")
+
     return {
         "commission_bps": float(pick("commission_bps", 5)),
         "slippage_bps": float(pick("slippage_bps", 5)),
@@ -76,18 +99,19 @@ def _cost_risk_from_body(body: dict) -> dict:
         "stop_loss_pct": (float(pick("stop_loss_pct", 0)) or None),
         "initial_capital": float(pick("initial_capital", 10000)),
         "position_size_pct": float(pick("position_size_pct", 100)),
+        "fill_timing": fill_timing,
+        "allow_short": bool(pick("allow_short", False)),
     }
 
 
 def _apply_strategy(df, strategy_key, params):
     # signals once - then we can backtest with/without costs on the same df
     params = params or {}
-    validation = None  # only ml fills this (folds / oos accuracy)
+    validation = None
 
     if strategy_key == "ma":
         fast = int(params.get("fast", 20))
         slow = int(params.get("slow", 50))
-        # catch nonsense before rolling averages waste a fetch
         if fast >= slow:
             raise ValueError("fast period must be smaller than slow period")
         if fast < 2 or slow < 3:
@@ -103,7 +127,8 @@ def _apply_strategy(df, strategy_key, params):
             raise ValueError("rsi period must be at least 2")
         df = rsi_strategy.run(df, period=period, overbought=overbought, oversold=oversold)
     elif strategy_key == "ml":
-        walk_forward = bool(params.get("walk_forward", False))
+        # default true - matches ui walk-forward checkbox
+        walk_forward = bool(params.get("walk_forward", True))
         n_folds = int(params.get("n_folds", 3))
         df, validation = ml_strategy.run(df, walk_forward=walk_forward, n_folds=n_folds)
     else:
@@ -112,7 +137,6 @@ def _apply_strategy(df, strategy_key, params):
 
 
 def _simulate(df, costs):
-    # strategy curve + buy&hold baseline share the same capital / fee knobs
     capital = costs["initial_capital"]
     bt = backtest(
         df,
@@ -122,6 +146,8 @@ def _simulate(df, costs):
         max_drawdown_pct=costs["max_drawdown_pct"],
         stop_loss_pct=costs["stop_loss_pct"],
         position_size_pct=costs.get("position_size_pct", 100),
+        fill_timing=costs.get("fill_timing", "next_bar"),
+        allow_short=costs.get("allow_short", False),
     )
     bh = buy_hold_curve(
         df,
@@ -133,7 +159,6 @@ def _simulate(df, costs):
 
 
 def _oos_window(validation):
-    # first test_start → last test_end across folds (for chart labels)
     if not validation or not validation.get("folds"):
         return None
     folds = validation["folds"]
@@ -161,13 +186,13 @@ def api_backtest():
         body = request.get_json(silent=True)
         if not body:
             return jsonify({"error": "expected json body with ticker, start, end, strategy, params"}), 400
-        ticker = body.get("ticker")
         start = body.get("start")
         end = body.get("end")
         strategy = body.get("strategy")
         params = body.get("params") or {}
-        if not ticker or not start or not end:
+        if not body.get("ticker") or not start or not end:
             return jsonify({"error": "ticker, start, and end are required"}), 400
+        ticker = _normalize_ticker(body.get("ticker"))
         sk = _normalize_strategy(strategy)
         if not sk:
             return jsonify(
@@ -175,7 +200,6 @@ def api_backtest():
                     "error": "strategy must be one of: moving average crossover, rsi strategy, ml signal",
                 }
             ), 400
-        # [:10] so "2024-01-01T00:00:00Z" still parses as a day
         try:
             datetime.strptime(str(start)[:10], "%Y-%m-%d")
             datetime.strptime(str(end)[:10], "%Y-%m-%d")
@@ -183,7 +207,6 @@ def api_backtest():
             return jsonify({"error": "start and end must be valid dates (yyyy-mm-dd)"}), 400
 
         costs = _cost_risk_from_body(body)
-        # treat <=0 as off even if pick() left a float
         if costs["max_drawdown_pct"] is not None and costs["max_drawdown_pct"] <= 0:
             costs["max_drawdown_pct"] = None
         if costs["stop_loss_pct"] is not None and costs["stop_loss_pct"] <= 0:
@@ -191,22 +214,24 @@ def api_backtest():
         if costs["position_size_pct"] <= 0 or costs["position_size_pct"] > 100:
             return jsonify({"error": "position_size_pct must be between 0 and 100"}), 400
 
-        # fetch, signal, chart payload, then two sims (with fees + zero fees)
         df = fetch_ohlcv(ticker, start, end)
         df, validation = _apply_strategy(df, sk, params)
         series = price_signals_payload(df)
 
-        # same signals, two cost worlds - honesty check for "edge" that dies on fees
         bt, bh = _simulate(df, costs)
         zero_costs = {
             **costs,
             "commission_bps": 0.0,
             "slippage_bps": 0.0,
         }
-        bt_zero, bh_zero = _simulate(df, zero_costs)
+        bt_zero, _bh_zero = _simulate(df, zero_costs)
         oos = _oos_window(validation)
+        oos_metrics = None
+        if oos and oos.get("oos_start"):
+            oos_metrics = oos_metrics_block(
+                bt, oos_start=oos["oos_start"], initial_capital=costs["initial_capital"]
+            )
 
-        # merge strategy knobs + cost knobs so reopen from history has everything
         persist_params = {
             **params,
             "commission_bps": costs["commission_bps"],
@@ -215,8 +240,9 @@ def api_backtest():
             "stop_loss_pct": costs["stop_loss_pct"],
             "initial_capital": costs["initial_capital"],
             "position_size_pct": costs["position_size_pct"],
+            "fill_timing": costs["fill_timing"],
+            "allow_short": costs["allow_short"],
         }
-        # blob the ui needs later - trades / risk / charts live in meta_json
         zero_cost = {
             "total_return": bt_zero["total_return"],
             "sharpe_ratio": bt_zero["sharpe_ratio"],
@@ -228,11 +254,14 @@ def api_backtest():
         meta = {
             "validation": validation,
             "oos_window": oos,
+            "oos_metrics": oos_metrics,
             "costs": {
                 "commission_bps": costs["commission_bps"],
                 "slippage_bps": costs["slippage_bps"],
                 "total_costs": bt.get("total_costs", 0),
                 "position_size_pct": costs["position_size_pct"],
+                "fill_timing": costs["fill_timing"],
+                "allow_short": costs["allow_short"],
             },
             "risk": {
                 "max_drawdown_pct": costs["max_drawdown_pct"],
@@ -250,10 +279,8 @@ def api_backtest():
                 "time_in_market": bt.get("time_in_market"),
                 "profit_factor": bt.get("profit_factor"),
             },
-            # so reopen from history can redraw signal chart + zero-cost overlay
             "price_series": series,
             "equity_curve_zero_cost": bt_zero["equity_curve"],
-            "buy_hold_curve_zero_cost": bh_zero,
             "zero_cost": zero_cost,
             "storage": (
                 "sqlite run history on purpose - fine for a single-user demo. "
@@ -261,14 +288,14 @@ def api_backtest():
             ),
             "limitations": [
                 "Paper backtest only - not live trading advice.",
-                "Fills at daily close; real markets have intraday path dependency.",
+                "Default fills next bar close; same-bar mode still available.",
                 "Costs are a simple bps model (commission + slippage), not exchange fees.",
             ],
         }
 
         run_id = save_run(
             created_at=datetime.now(timezone.utc).isoformat(),
-            ticker=str(ticker),
+            ticker=ticker,
             start_date=str(start)[:10],
             end_date=str(end)[:10],
             strategy=sk,
@@ -278,13 +305,11 @@ def api_backtest():
             equity_curve=bt["equity_curve"],
             buy_hold_curve=bh,
         )
-        # flat response for the frontend - mirrors columns the charts/metrics expect
         out = {
             "run_id": run_id,
             "equity_curve": bt["equity_curve"],
             "buy_hold_curve": bh,
             "equity_curve_zero_cost": bt_zero["equity_curve"],
-            "buy_hold_curve_zero_cost": bh_zero,
             "zero_cost": zero_cost,
             "price_series": series,
             "total_return": bt["total_return"],
@@ -301,6 +326,8 @@ def api_backtest():
             "commission_bps": bt.get("commission_bps", 0),
             "slippage_bps": bt.get("slippage_bps", 0),
             "position_size_pct": bt.get("position_size_pct", 100),
+            "fill_timing": costs["fill_timing"],
+            "allow_short": costs["allow_short"],
             "halted": bt.get("halted", False),
             "halt_reason": bt.get("halt_reason"),
             "stop_exits": bt.get("stop_exits", 0),
@@ -308,22 +335,29 @@ def api_backtest():
             "desk_note": "",
             "validation": validation,
             "oos_window": oos,
+            "oos_metrics": oos_metrics,
             "meta": meta,
         }
         return jsonify(out)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"backtest failed: {e!s}"}), 500
+    except Exception:
+        return jsonify({"error": "backtest failed"}), 500
 
 
 @app.route("/api/runs", methods=["GET"])
 def api_runs():
-    # optional ticker/strategy filters for the sidebar list
     limit = request.args.get("limit", default=20, type=int)
     ticker = request.args.get("ticker")
     strategy = request.args.get("strategy")
     return jsonify({"runs": list_runs(limit, ticker=ticker, strategy=strategy)})
+
+
+@app.route("/api/runs", methods=["DELETE"])
+def api_runs_clear():
+    # wipe history - single-user demo
+    n = clear_runs()
+    return jsonify({"ok": True, "deleted": n})
 
 
 @app.route("/api/runs/<int:run_id>", methods=["GET"])
@@ -334,25 +368,74 @@ def api_run_detail(run_id: int):
     return jsonify(row)
 
 
+@app.route("/api/runs/<int:run_id>", methods=["DELETE"])
+def api_run_delete(run_id: int):
+    ok = delete_run(run_id)
+    if not ok:
+        return jsonify({"error": "run not found"}), 404
+    return jsonify({"ok": True, "id": run_id})
+
+
 @app.route("/api/runs/<int:run_id>/note", methods=["PATCH", "POST"])
 def api_run_note(run_id: int):
-    # short judgment line after a run - not part of the engine
     try:
         body = request.get_json(silent=True) or {}
         note = body.get("note", "")
         row = update_run_note(run_id, note)
         if row is None:
             return jsonify({"error": "run not found"}), 404
-        # pull note back out of meta so the client gets a flat field
         return jsonify({"id": row["id"], "desk_note": (row.get("meta") or {}).get("desk_note", "")})
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"could not save note: {e!s}"}), 500
+    except Exception:
+        return jsonify({"error": "could not save note"}), 500
+
+
+@app.route("/api/ma-sensitivity", methods=["POST"])
+def api_ma_sensitivity():
+    # thin wrap over moving_average.sensitivity_grid - signal counts only
+    try:
+        body = request.get_json(silent=True)
+        if not body:
+            return jsonify({"error": "expected json body with ticker, start, end"}), 400
+        if not body.get("ticker") or not body.get("start") or not body.get("end"):
+            return jsonify({"error": "ticker, start, and end are required"}), 400
+        ticker = _normalize_ticker(body.get("ticker"))
+        start = body.get("start")
+        end = body.get("end")
+        try:
+            datetime.strptime(str(start)[:10], "%Y-%m-%d")
+            datetime.strptime(str(end)[:10], "%Y-%m-%d")
+        except ValueError:
+            return jsonify({"error": "start and end must be valid dates (yyyy-mm-dd)"}), 400
+
+        pairs = body.get("pairs")
+        if not pairs:
+            # small default grid
+            pairs = [(5, 20), (10, 30), (20, 50), (50, 200)]
+        cleaned = []
+        for p in pairs:
+            if not isinstance(p, (list, tuple)) or len(p) != 2:
+                raise ValueError("pairs must be a list of [fast, slow]")
+            cleaned.append((int(p[0]), int(p[1])))
+
+        df = fetch_ohlcv(ticker, start, end)
+        rows = moving_average.sensitivity_grid(df, cleaned)
+        return jsonify(
+            {
+                "ticker": ticker,
+                "start": str(start)[:10],
+                "end": str(end)[:10],
+                "rows": rows,
+            }
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception:
+        return jsonify({"error": "ma sensitivity failed"}), 500
 
 
 def _metric_row(sk: str, bt: dict, validation=None) -> dict:
-    # one compare-table row - prefer mean oos when walk-forward ran
     oos = None
     if validation:
         oos = validation.get("mean_oos_accuracy")
@@ -376,17 +459,16 @@ def _metric_row(sk: str, bt: dict, validation=None) -> dict:
 
 @app.route("/api/compare", methods=["POST"])
 def api_compare():
-    # same ticker/dates/costs - ma vs rsi vs ml side by side
     try:
         body = request.get_json(silent=True)
         if not body:
             return jsonify({"error": "expected json body with ticker, start, end"}), 400
-        ticker = body.get("ticker")
         start = body.get("start")
         end = body.get("end")
         params = body.get("params") or {}
-        if not ticker or not start or not end:
+        if not body.get("ticker") or not start or not end:
             return jsonify({"error": "ticker, start, and end are required"}), 400
+        ticker = _normalize_ticker(body.get("ticker"))
         try:
             datetime.strptime(str(start)[:10], "%Y-%m-%d")
             datetime.strptime(str(end)[:10], "%Y-%m-%d")
@@ -401,9 +483,7 @@ def api_compare():
         if costs["position_size_pct"] <= 0 or costs["position_size_pct"] > 100:
             return jsonify({"error": "position_size_pct must be between 0 and 100"}), 400
 
-        # one yahoo pull, then three strategy copies so we dont re-hit the cache thrice
         base = fetch_ohlcv(ticker, start, end)
-        # defaults so compare is fair without needing every slider filled
         strategy_params = {
             "ma": {"fast": int(params.get("fast", 20)), "slow": int(params.get("slow", 50))},
             "rsi": {
@@ -419,14 +499,14 @@ def api_compare():
 
         rows = []
         for sk in ("ma", "rsi", "ml"):
-            df = base.copy()  # each strategy mutates its own frame
+            df = base.copy()
             df, validation = _apply_strategy(df, sk, strategy_params[sk])
             bt, _bh = _simulate(df, costs)
             rows.append(_metric_row(sk, bt, validation))
 
         return jsonify(
             {
-                "ticker": str(ticker).upper(),
+                "ticker": ticker,
                 "start": str(start)[:10],
                 "end": str(end)[:10],
                 "costs": {
@@ -435,14 +515,16 @@ def api_compare():
                     "position_size_pct": costs["position_size_pct"],
                     "max_drawdown_pct": costs["max_drawdown_pct"],
                     "stop_loss_pct": costs["stop_loss_pct"],
+                    "fill_timing": costs["fill_timing"],
+                    "allow_short": costs["allow_short"],
                 },
                 "rows": rows,
             }
         )
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
-        return jsonify({"error": f"compare failed: {e!s}"}), 500
+    except Exception:
+        return jsonify({"error": "compare failed"}), 500
 
 
 if __name__ == "__main__":

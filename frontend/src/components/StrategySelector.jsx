@@ -1,7 +1,7 @@
 // sends json to /api/backtest
 
 import { useEffect, useMemo, useState } from "react";
-import { fetchTickers } from "../api/client.js";
+import { fetchTickers, runMaSensitivity } from "../api/client.js";
 import InfoTip from "./InfoTip.jsx";
 import "./StrategySelector.css";
 
@@ -21,9 +21,12 @@ function TipLabel({ children, tip }) {
   );
 }
 
+const TICKER_RE = /^[A-Za-z0-9.\-^=]{1,32}$/;
+
 export default function StrategySelector({ onRun, onCompare, loading, error }) {
   const [tickers, setTickers] = useState([]);
   const [ticker, setTicker] = useState("aapl");
+  const [customTicker, setCustomTicker] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [strategy, setStrategy] = useState("moving_average_crossover");
@@ -39,11 +42,14 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
   const [maxDrawdownPct, setMaxDrawdownPct] = useState(0);
   const [stopLossPct, setStopLossPct] = useState(0);
   const [positionSizePct, setPositionSizePct] = useState(100);
+  const [fillTiming, setFillTiming] = useState("next_bar");
+  const [allowShort, setAllowShort] = useState(false);
   const [loadErr, setLoadErr] = useState(null);
   const [formErr, setFormErr] = useState(null);
+  const [sensRows, setSensRows] = useState(null);
+  const [sensBusy, setSensBusy] = useState(false);
 
   useEffect(() => {
-    // default window: last two years ending today
     const today = new Date();
     const twoYearsAgo = new Date();
     twoYearsAgo.setFullYear(today.getFullYear() - 2);
@@ -64,18 +70,24 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
         if (!cancelled) setLoadErr(e.message);
       });
     return () => {
-      cancelled = true; // ignore late responses after unmount
+      cancelled = true;
     };
   }, []);
 
+  const resolvedTicker = () => {
+    const custom = customTicker.trim();
+    return custom || ticker;
+  };
+
   const params = useMemo(() => {
-    // cost knobs always travel with strategy knobs
     const base = {
       commission_bps: commissionBps,
       slippage_bps: slippageBps,
       max_drawdown_pct: maxDrawdownPct || null,
       stop_loss_pct: stopLossPct || null,
       position_size_pct: positionSizePct,
+      fill_timing: fillTiming,
+      allow_short: allowShort,
     };
     if (strategy === "moving_average_crossover") {
       return { ...base, fast, slow };
@@ -98,11 +110,12 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
     maxDrawdownPct,
     stopLossPct,
     positionSizePct,
+    fillTiming,
+    allowShort,
   ]);
 
-  // body shape the flask /api/backtest + /api/compare endpoints expect
   const buildPayload = () => ({
-    ticker,
+    ticker: resolvedTicker(),
     start,
     end,
     strategy,
@@ -112,11 +125,17 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
     max_drawdown_pct: maxDrawdownPct || null,
     stop_loss_pct: stopLossPct || null,
     position_size_pct: positionSizePct,
+    fill_timing: fillTiming,
+    allow_short: allowShort,
   });
 
   const validate = () => {
-    // cheap client-side checks before we spend a round trip
     setFormErr(null);
+    const t = resolvedTicker();
+    if (!t || !TICKER_RE.test(t)) {
+      setFormErr("ticker must be 1-32 chars: letters, digits, '.', '-', '^', or '='");
+      return false;
+    }
     if (strategy === "moving_average_crossover" && fast >= slow) {
       setFormErr("fast period must be smaller than slow period");
       return false;
@@ -144,10 +163,29 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
     onCompare?.(buildPayload());
   };
 
-  // which strategy-specific sliders to show
+  const handleSensitivity = async () => {
+    if (!validate()) return;
+    setSensBusy(true);
+    setFormErr(null);
+    try {
+      const data = await runMaSensitivity({
+        ticker: resolvedTicker(),
+        start,
+        end,
+      });
+      setSensRows(data.rows || []);
+    } catch (err) {
+      setFormErr(err?.message || "sensitivity failed");
+      setSensRows(null);
+    } finally {
+      setSensBusy(false);
+    }
+  };
+
   const showMa = strategy === "moving_average_crossover";
   const showRsi = strategy === "rsi_strategy";
   const showMl = strategy === "ml_signal";
+  const canSubmit = Boolean(tickers.length || customTicker.trim());
 
   return (
     <form className="strategy-panel" onSubmit={handleSubmit}>
@@ -158,7 +196,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
       {loadErr && <div className="inline-msg warn">tickers: {loadErr}</div>}
 
       <label className="field">
-        <TipLabel tip="which stock or etf to pretend-trade using yahoo history">ticker</TipLabel>
+        <TipLabel tip="preset list - or type a custom symbol below">ticker</TipLabel>
         <select value={ticker} onChange={(e) => setTicker(e.target.value)} disabled={!tickers.length}>
           {tickers.map((t) => (
             <option key={t} value={t}>
@@ -166,6 +204,20 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
             </option>
           ))}
         </select>
+      </label>
+
+      <label className="field">
+        <TipLabel tip="optional - overrides the preset when filled (yahoo symbol)">
+          custom ticker
+        </TipLabel>
+        <input
+          type="text"
+          className="text-input"
+          placeholder="e.g. VOD.L"
+          value={customTicker}
+          onChange={(e) => setCustomTicker(e.target.value)}
+          maxLength={32}
+        />
       </label>
 
       <div className="field-row">
@@ -214,6 +266,36 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
               onChange={(e) => setSlow(Number(e.target.value))}
             />
           </label>
+          <button
+            type="button"
+            className="ghost-btn sens-btn"
+            onClick={handleSensitivity}
+            disabled={sensBusy || loading}
+          >
+            {sensBusy ? "sweeping…" : "ma sensitivity grid"}
+          </button>
+          {sensRows && (
+            <table className="sens-table">
+              <thead>
+                <tr>
+                  <th>fast</th>
+                  <th>slow</th>
+                  <th>buys</th>
+                  <th>sells</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sensRows.map((r) => (
+                  <tr key={`${r.fast}-${r.slow}`}>
+                    <td>{r.fast}</td>
+                    <td>{r.slow}</td>
+                    <td>{r.buy_signals}</td>
+                    <td>{r.sell_signals}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
@@ -282,7 +364,8 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
           )}
           <p className="hint">
             ml only trades out-of-sample bars. walk-forward expands the train window each fold to
-            reduce optimistic overfitting.
+            reduce optimistic overfitting. headline metrics still include flat in-sample equity -
+            check oos metrics after the run.
           </p>
         </div>
       )}
@@ -314,6 +397,25 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
             value={slippageBps}
             onChange={(e) => setSlippageBps(Number(e.target.value))}
           />
+        </label>
+        <label className="field">
+          <TipLabel tip="next_bar fills tomorrow's close (default). same_bar uses the signal day's close">
+            fill timing
+          </TipLabel>
+          <select value={fillTiming} onChange={(e) => setFillTiming(e.target.value)}>
+            <option value="next_bar">next bar (default)</option>
+            <option value="same_bar">same bar close</option>
+          </select>
+        </label>
+        <label className="check-label">
+          <input
+            type="checkbox"
+            checked={allowShort}
+            onChange={(e) => setAllowShort(e.target.checked)}
+          />
+          <TipLabel tip="when flat, a sell signal can open a short. no borrow cost. off by default">
+            allow shorting
+          </TipLabel>
         </label>
         <label className="slider-label">
           <TipLabel tip="if portfolio drops this % from its peak we flatten and stop buying">
@@ -354,7 +456,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
         </label>
       </div>
 
-      <button type="submit" className="run-btn" disabled={loading || !tickers.length}>
+      <button type="submit" className="run-btn" disabled={loading || !canSubmit}>
         {loading ? (
           <span className="btn-inner">
             <span className="spinner" aria-hidden />
@@ -371,7 +473,7 @@ export default function StrategySelector({ onRun, onCompare, loading, error }) {
       <button
         type="button"
         className="compare-btn"
-        disabled={loading || !tickers.length || !onCompare}
+        disabled={loading || !canSubmit || !onCompare}
         onClick={handleCompare}
       >
         <span className="btn-inner">

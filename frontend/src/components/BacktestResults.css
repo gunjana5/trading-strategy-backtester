@@ -44,6 +44,24 @@
   padding: 0.5rem 0;
 }
 
+.chart-loading {
+  font-size: 0.72rem;
+  color: var(--quiet);
+  margin: 0.5rem 0;
+}
+
+.oos-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text);
+  background: rgba(158, 201, 255, 0.08);
+  border: 1px solid rgba(158, 201, 255, 0.3);
+  padding: 0.65rem 0.8rem;
+}
+
 .fade-in {
   animation: fadeIn 0.55s ease-out both;
 }

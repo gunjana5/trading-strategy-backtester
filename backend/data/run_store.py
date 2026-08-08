@@ -3,13 +3,21 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from pathlib import Path
 
-_DB_PATH = Path(__file__).resolve().parent.parent / "backtest_runs.db"
+# BACKTEST_RUNS_DB lets docker mount a durable path
+_DB_PATH = Path(
+    os.environ.get(
+        "BACKTEST_RUNS_DB",
+        str(Path(__file__).resolve().parent.parent / "backtest_runs.db"),
+    )
+)
 
 
 def _connect() -> sqlite3.Connection:
+    _DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(_DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute(
@@ -195,3 +203,17 @@ def update_run_note(run_id: int, note: str) -> dict | None:
         )
         conn.commit()
     return get_run(run_id)
+
+
+def delete_run(run_id: int) -> bool:
+    with _connect() as conn:
+        cur = conn.execute("DELETE FROM backtest_runs WHERE id = ?", (int(run_id),))
+        conn.commit()
+        return cur.rowcount > 0
+
+
+def clear_runs() -> int:
+    with _connect() as conn:
+        cur = conn.execute("DELETE FROM backtest_runs")
+        conn.commit()
+        return int(cur.rowcount)

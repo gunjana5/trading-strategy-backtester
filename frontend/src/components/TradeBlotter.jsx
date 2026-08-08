@@ -44,26 +44,32 @@ export default function TradeBlotter({ trades }) {
             <tr>
               <th>
                 <span className="label-row">
+                  side
+                  <InfoTip text="long or short paper trade" />
+                </span>
+              </th>
+              <th>
+                <span className="label-row">
                   entry
-                  <InfoTip text="day we bought" />
+                  <InfoTip text="day we opened" />
                 </span>
               </th>
               <th>
                 <span className="label-row">
                   exit
-                  <InfoTip text="day we sold" />
+                  <InfoTip text="day we closed" />
                 </span>
               </th>
               <th>
                 <span className="label-row">
                   entry px
-                  <InfoTip text="fill price on the buy incl slippage" />
+                  <InfoTip text="fill price on entry incl slippage" />
                 </span>
               </th>
               <th>
                 <span className="label-row">
                   exit px
-                  <InfoTip text="fill price on the sell incl slippage" />
+                  <InfoTip text="fill price on exit incl slippage" />
                 </span>
               </th>
               <th>
@@ -93,6 +99,7 @@ export default function TradeBlotter({ trades }) {
               const tone = pnl > 0 ? "good" : pnl < 0 ? "bad" : "neutral";
               return (
                 <tr key={`${t.entry_date}-${t.exit_date}-${i}`}>
+                  <td>{t.side || "long"}</td>
                   <td>{t.entry_date}</td>
                   <td>{t.exit_date}</td>
                   <td>{fmtPx(t.entry_price)}</td>
