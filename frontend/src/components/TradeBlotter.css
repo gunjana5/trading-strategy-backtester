@@ -1,0 +1,81 @@
+.blotter {
+  margin-top: 1rem;
+  border: 1.5px solid var(--line);
+  background: var(--slate);
+  overflow: hidden;
+}
+
+.blotter-head {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  padding: 0.75rem 0.9rem 0.4rem;
+}
+
+.blotter-head .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.blotter-empty {
+  margin: 0;
+  padding: 0.4rem 0.9rem 0.9rem;
+  color: var(--quiet);
+  font-size: 0.85rem;
+}
+
+.blotter-scroll {
+  overflow-x: auto;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.blotter-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.blotter-table th,
+.blotter-table td {
+  text-align: left;
+  padding: 0.45rem 0.75rem;
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.blotter-table th {
+  color: var(--quiet);
+  font-weight: 700;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: sticky; /* header stays put while scrolling the blotter */
+  top: 0;
+  background: var(--slate);
+  font-family: var(--font-display);
+}
+
+.blotter-table th .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.blotter-table td.tone-good {
+  color: var(--mint);
+}
+
+.blotter-table td.tone-bad {
+  color: var(--coral);
+}
+
+.blotter-table td.tone-neutral {
+  color: var(--ice);
+}

@@ -1,0 +1,150 @@
+.welcome-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 10060;
+  background: rgba(11, 18, 32, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.welcome-card {
+  width: min(22rem, 100%);
+  background: var(--slate);
+  border: 1.5px solid var(--amber);
+  padding: 1.15rem 1.2rem 1.05rem;
+  position: relative;
+}
+
+.welcome-card::before {
+  /* stamped paper badge - just decoration */
+  content: "PAPER";
+  position: absolute;
+  top: 0.7rem;
+  right: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--coral);
+  border: 1.5px solid var(--coral);
+  padding: 0.15rem 0.35rem;
+  transform: rotate(8deg);
+}
+
+.welcome-title {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--paper);
+  font-weight: 800;
+}
+
+.welcome-body {
+  margin: 0 0 0.9rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 18rem;
+}
+
+.welcome-ok {
+  border: none;
+  padding: 0.5rem 0.9rem;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.site-help-corner {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 10040;
+}
+
+.site-help-fab {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1.5px solid var(--amber);
+  background: var(--panel);
+  color: var(--amber);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.site-help-fab:hover,
+.site-help-fab:focus-visible {
+  background: var(--amber);
+  color: var(--ink);
+  outline: none;
+}
+
+.site-help-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.55rem);
+  width: min(18rem, calc(100vw - 2rem));
+  background: var(--slate);
+  border: 1.5px solid var(--line);
+  padding: 0.8rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.site-help-panel p {
+  margin: 0 0 0.55rem;
+}
+
+.site-help-panel ul {
+  margin: 0 0 0.55rem;
+  padding-left: 1.1rem;
+}
+
+.site-help-panel li {
+  margin-bottom: 0.2rem;
+}
+
+.site-help-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+  color: var(--amber);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.site-help-close {
+  border: none;
+  background: transparent;
+  color: var(--quiet);
+  font-size: 0.7rem;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+}
+
+.site-help-close:hover {
+  color: var(--amber);
+}
+
+.site-help-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--quiet);
+  margin: 0 !important;
+}

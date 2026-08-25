@@ -1,0 +1,71 @@
+.desk-note {
+  margin-top: 0.85rem;
+  border: 1.5px solid var(--line);
+  background: var(--slate);
+  padding: 0.75rem 0.85rem;
+}
+
+.desk-note-head {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin-bottom: 0.45rem;
+}
+
+.desk-note-head .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.desk-note textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 4.5rem;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.55rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.desk-note textarea:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+.desk-note-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.desk-note-actions button {
+  border: none;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+.desk-note-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.desk-note-meta,
+.desk-note-status {
+  font-size: 0.68rem;
+  color: var(--quiet);
+}

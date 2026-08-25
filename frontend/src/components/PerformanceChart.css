@@ -1,0 +1,50 @@
+.chart-card {
+  background: linear-gradient(165deg, var(--panel) 0%, var(--slate) 100%);
+  border: 1.5px solid var(--line);
+  padding: 0.9rem 0.8rem 0.7rem;
+}
+
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: 0 0 0.35rem 0.15rem;
+}
+
+.chart-wrap {
+  width: 100%;
+  min-height: 280px; /* leave room for the area chart */
+}
+
+.chart-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.oos-badge {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--mint);
+  padding: 0.2rem 0.45rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transform: rotate(1deg);
+}
+
+.chart-caption {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.68rem;
+  color: var(--quiet);
+  line-height: 1.4;
+}

@@ -1,0 +1,35 @@
+.signal-card {
+  background: linear-gradient(165deg, var(--panel) 0%, var(--slate) 100%);
+  border: 1.5px solid var(--line);
+  padding: 0.9rem 0.8rem 0.7rem;
+}
+
+.signal-title {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: 0 0 0.35rem 0.15rem;
+}
+
+.signal-legend {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 0.4rem 0.35rem;
+  font-size: 0.68rem;
+}
+
+.leg-buy {
+  color: var(--mint);
+}
+
+.leg-sell {
+  color: var(--coral);
+}
+
+.signal-wrap {
+  width: 100%;
+  min-height: 260px; /* matches ResponsiveContainer height */
+}

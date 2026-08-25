@@ -1,0 +1,52 @@
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 0.55rem;
+}
+
+.risk-card {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--slate);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.risk-card:hover {
+  border-color: var(--amber);
+  transform: translateY(-1px);
+}
+
+.risk-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--quiet);
+  margin-bottom: 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.risk-label .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.risk-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums; /* stop digits jumping while animating */
+}
+
+.risk-card.tone-good .risk-value {
+  color: var(--mint);
+}
+
+.risk-card.tone-bad .risk-value {
+  color: var(--coral);
+}
+
+.risk-card.tone-neutral .risk-value {
+  color: var(--ice);
+}

@@ -1,0 +1,229 @@
+.strategy-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.1rem;
+  background: linear-gradient(160deg, var(--panel) 0%, var(--slate) 100%);
+  border: 1.5px solid var(--line);
+}
+
+.panel-heading {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 0.15rem;
+  display: flex;
+  align-items: center;
+}
+
+.panel-heading .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field > span,
+.field .label-row {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.field select,
+.field input[type="date"] {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.5rem 0.55rem;
+  font-size: 0.82rem;
+}
+
+.field select:focus,
+.field input:focus {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-dim);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.slider-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.7rem 0.55rem;
+  background: rgba(240, 164, 58, 0.05);
+  border: 1px dashed var(--line);
+}
+
+.slider-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.slider-label input[type="range"] {
+  width: 100%;
+  accent-color: var(--amber);
+}
+
+.run-btn {
+  margin-top: 0.25rem;
+  padding: 0.7rem 1rem;
+  border: none;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.run-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #ffb84d;
+}
+
+.run-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.compare-btn {
+  margin-top: 0.15rem;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid var(--ice);
+  background: transparent;
+  color: var(--ice);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.compare-btn:hover:not(:disabled) {
+  background: rgba(158, 201, 255, 0.1);
+}
+
+.compare-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  /* little ring while the backtest request is in flight */
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(11, 18, 32, 0.25);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.inline-msg {
+  font-size: 0.75rem;
+  padding: 0.45rem 0.55rem;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.inline-msg.error {
+  background: var(--coral-dim);
+  border: 1px solid rgba(255, 92, 77, 0.4);
+  color: #ffb0a8;
+}
+
+.inline-msg.warn {
+  background: rgba(240, 164, 58, 0.1);
+  border: 1px solid rgba(240, 164, 58, 0.35);
+  color: #e8c88a;
+}
+
+.panel-heading.subtle {
+  margin-top: 0.35rem;
+  color: var(--ice);
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.check-label input {
+  accent-color: var(--amber);
+}
+
+.hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--quiet);
+}
+
+.field .text-input {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.5rem 0.55rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
+.sens-btn {
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+
+.sens-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  margin-top: 0.35rem;
+}
+
+.sens-table th,
+.sens-table td {
+  border: 1px solid var(--line);
+  padding: 0.25rem 0.35rem;
+  text-align: right;
+}
+
+.sens-table th {
+  color: var(--muted);
+  font-weight: 600;
+}

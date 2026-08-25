@@ -1,0 +1,18 @@
+# deps / build junk - never upload these
+node_modules/
+frontend/node_modules/
+frontend/dist/
+backend/.venv/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+*.db
+.DS_Store
+**/.DS_Store
+.env
+.env.*
+
+# private scratch / interview notes - local only
+NOTES.md
+docs/SYSTEMS.md
+docs/

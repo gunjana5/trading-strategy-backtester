@@ -1,0 +1,166 @@
+.results-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.results-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.28rem 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--amber);
+  font-weight: 800;
+  transform: rotate(-1deg);
+}
+
+.subtle {
+  font-size: 0.7rem;
+  color: var(--quiet);
+}
+
+.charts-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.signal-missing {
+  font-size: 0.72rem;
+  color: var(--quiet);
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.chart-loading {
+  font-size: 0.72rem;
+  color: var(--quiet);
+  margin: 0.5rem 0;
+}
+
+.oos-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text);
+  background: rgba(158, 201, 255, 0.08);
+  border: 1px solid rgba(158, 201, 255, 0.3);
+  padding: 0.65rem 0.8rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.55s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.honesty-banner {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--mint-dim);
+  border: 1px solid rgba(61, 204, 156, 0.35);
+  padding: 0.65rem 0.8rem;
+}
+
+.honesty-banner.warn {
+  /* coral when risk halt fired */
+  background: var(--coral-dim);
+  border-color: rgba(255, 92, 77, 0.4);
+  color: #ffc0ba;
+}
+
+.fold-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: var(--slate);
+}
+
+.fold-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  color: var(--text);
+}
+
+.fold-table th,
+.fold-table td {
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.fold-table th {
+  color: var(--quiet);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+}
+
+.oos-tag {
+  color: var(--mint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.cost-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.cost-toggle input {
+  accent-color: var(--amber);
+  margin-top: 0.15rem;
+}
+
+.cost-toggle em {
+  color: var(--quiet);
+  font-style: normal;
+}
+
+.export-btn {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}

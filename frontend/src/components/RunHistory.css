@@ -1,0 +1,145 @@
+.run-history {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.75rem;
+  padding: 0.9rem;
+  border: 1.5px solid var(--line);
+  background: var(--slate);
+}
+
+.run-history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ice);
+  margin-bottom: 0.55rem;
+}
+
+.run-history-head .info-tip-pop {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+
+.ghost-btn:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+.run-history-filters {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+}
+
+.run-filter-input,
+.run-filter-select {
+  flex: 1;
+  min-width: 0;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.3rem 0.45rem;
+}
+
+.run-filter-input:focus,
+.run-filter-select:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+.run-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 220px; /* keep the sidebar from growing forever */
+  overflow-y: auto;
+}
+
+.run-item {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.4rem;
+  align-items: center;
+  background: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.45rem 0.55rem;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+.run-item:hover {
+  border-color: var(--amber);
+}
+
+.run-ticker {
+  font-weight: 700;
+  color: var(--amber);
+  font-family: var(--font-display);
+}
+
+.run-meta {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.run-date {
+  color: var(--quiet);
+  font-size: 0.65rem;
+}
+
+.run-history-empty,
+.run-history-err {
+  font-size: 0.7rem;
+  color: var(--quiet);
+  margin: 0.25rem 0;
+}
+
+.run-history-err {
+  color: var(--coral);
+}
+
+.run-history-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.run-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.run-row .run-item {
+  flex: 1;
+}
+
+.run-del {
+  flex-shrink: 0;
+}

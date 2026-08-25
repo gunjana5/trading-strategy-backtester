@@ -1,0 +1,356 @@
+/* shell layout + wonky stamps / grid wash */
+.app-shell {
+  display: grid;
+  /* fixed left rail, fluid desk on the right */
+  grid-template-columns: minmax(300px, 360px) 1fr;
+  min-height: 100%;
+  background:
+    radial-gradient(900px 420px at 85% -10%, rgba(240, 164, 58, 0.12), transparent 55%),
+    radial-gradient(700px 380px at 10% 100%, rgba(61, 204, 156, 0.08), transparent 50%),
+    var(--ink);
+}
+
+.desk-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100%;
+}
+
+.sidebar {
+  position: relative;
+  padding: 1.35rem 1.1rem 1.6rem 1.25rem;
+  border-right: 1px solid var(--line);
+  background:
+    linear-gradient(165deg, rgba(242, 230, 208, 0.04), transparent 40%),
+    linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  overflow: hidden;
+}
+
+.sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  /* faint grid that fades out so it doesnt fight the brand */
+  background-image:
+    linear-gradient(rgba(158, 201, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(158, 201, 255, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+}
+
+.brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  animation: brandIn 0.7s ease-out both;
+}
+
+@keyframes brandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--amber);
+  background: var(--amber-dim);
+  display: grid;
+  place-items: center;
+  transform: rotate(-3deg);
+}
+
+.brand-mark img {
+  width: 30px;
+  height: 30px;
+}
+
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  line-height: 1.05;
+  min-width: 0;
+}
+
+.brand-kicker {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.brand-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  line-height: 0.95;
+}
+
+.stamp-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  animation: brandIn 0.7s ease-out 0.12s both;
+}
+
+.stamp {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.45rem;
+  border: 1.5px solid currentColor;
+  transform: rotate(-1.5deg);
+}
+
+.stamp-paper {
+  color: var(--coral);
+  background: var(--coral-dim);
+}
+
+.stamp-desk {
+  color: var(--ice);
+  background: rgba(158, 201, 255, 0.1);
+  transform: rotate(1.5deg);
+}
+
+.tagline {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 22rem;
+}
+
+.spark-strip {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 28px;
+  opacity: 0.85;
+  margin: 0.15rem 0 0.25rem;
+}
+
+.spark-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.main {
+  position: relative;
+  flex: 1;
+  padding: 1.1rem 1.35rem 2.25rem;
+  overflow: hidden;
+}
+
+.main::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  bottom: 40px;
+  width: 180px;
+  height: 180px;
+  pointer-events: none;
+  opacity: 0.07;
+  background: radial-gradient(circle at 30% 30%, var(--coral), transparent 55%),
+    radial-gradient(circle at 70% 60%, var(--amber), transparent 50%);
+  filter: blur(2px);
+}
+
+.main-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.main-eyebrow {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ice);
+  margin-bottom: 0.25rem;
+}
+
+.main-lede {
+  margin: 0;
+  max-width: 28rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(240, 164, 58, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 164, 58, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.main-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  padding: 2.25rem 0 1rem;
+}
+
+.empty-card {
+  width: 100%;
+  max-width: 540px;
+  padding: 1.4rem 1.45rem 1.2rem;
+  border: 1.5px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(242, 230, 208, 0.07), transparent 45%),
+    var(--slate);
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-card::after {
+  content: "";
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 52px;
+  height: 52px;
+  background: url("/icons/ticket.svg") center / contain no-repeat;
+  opacity: 0.7;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--paper);
+  margin-bottom: 0.55rem;
+  letter-spacing: -0.02em;
+}
+
+.empty-body {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 28rem;
+}
+
+.empty-icons {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.empty-icons img {
+  width: 28px;
+  height: 28px;
+  opacity: 0.85;
+  animation: bob 1.6s ease-in-out infinite;
+}
+
+.empty-icons img:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.empty-icons img:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.loading-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.loading-pulse {
+  width: 9px;
+  height: 9px;
+  background: var(--amber);
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 880px) {
+  /* stack sidebar above charts on phones */
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .main-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

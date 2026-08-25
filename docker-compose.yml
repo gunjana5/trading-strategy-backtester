@@ -1,0 +1,31 @@
+# local stack - same ports as ./run.sh. api needs network for yahoo.
+services:
+  api:
+    build: ./backend
+    ports:
+      - "5050:5050"
+    environment:
+      BACKTEST_RUNS_DB: /data/backtest_runs.db
+    volumes:
+      # sqlite history survives container restarts
+      - runs_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5050/api/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+  web:
+    build:
+      context: ./frontend
+      args:
+        # browser on the host talks to published api port
+        VITE_API_URL: http://localhost:5050
+    ports:
+      - "5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  runs_data:
