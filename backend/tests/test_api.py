@@ -41,7 +41,9 @@ def test_health_and_tickers(client):
     assert h.get_json()["ok"] is True
     t = client.get("/api/tickers")
     assert t.status_code == 200
-    assert "aapl" in t.get_json()["tickers"]
+    tickers = t.get_json()["tickers"]
+    assert "aapl" in tickers
+    assert "demo" in tickers
 
 
 def test_backtest_missing_body(client):

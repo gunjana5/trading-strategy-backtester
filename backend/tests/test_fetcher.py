@@ -94,3 +94,18 @@ def test_missing_columns_raises(monkeypatch, tmp_path):
     monkeypatch.setattr(fetcher.yf, "download", MagicMock(return_value=raw))
     with pytest.raises(ValueError, match="missing columns"):
         fetcher.fetch_ohlcv("aapl", "2024-01-01", "2024-02-01")
+
+
+def test_demo_ticker_loads_fixture_without_yahoo(monkeypatch):
+    # DEMO must never call yfinance
+    monkeypatch.setattr(
+        fetcher.yf,
+        "download",
+        MagicMock(side_effect=AssertionError("demo should not hit yahoo")),
+    )
+    out = fetcher.fetch_ohlcv("demo", "2023-01-01", "2024-12-31")
+    assert len(out) > 100
+    assert list(out.columns) == ["open", "high", "low", "close", "volume"]
+    sliced = fetcher.fetch_ohlcv("DEMO", "2023-06-01", "2023-06-30")
+    assert len(sliced) < len(out)
+    assert sliced.index.min() >= pd.Timestamp("2023-06-01")

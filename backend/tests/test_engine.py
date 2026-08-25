@@ -151,6 +151,22 @@ def test_allow_short_opens_on_sell_when_flat():
     assert shorted["total_return"] > 0
 
 
+def test_stop_loss_exits_short_when_price_rises():
+    # short at 100, price jumps - stop should cover before the last bar
+    df = _series([100, 105, 112, 120], [0, -1, 0, 0])
+    result = backtest(
+        df,
+        initial_capital=1000,
+        stop_loss_pct=8,
+        fill_timing="same_bar",
+        allow_short=True,
+    )
+    assert result["stop_exits"] >= 1
+    assert result["num_trades"] >= 1
+    assert result["trades"][0]["side"] == "short"
+    assert result["trades"][0]["reason"] == "stop_loss"
+
+
 def test_oos_metrics_block_rebases():
     df = _series([100, 100, 100, 110, 120], [0, 0, 1, 0, -1])
     bt = backtest(df, initial_capital=1000, fill_timing="same_bar")

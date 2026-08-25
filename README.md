@@ -17,6 +17,7 @@ trading-strategy-backtester/
   backend/backtester/         # engine + walk-forward
   backend/strategies/         # ma / rsi / ml facade (signals only)
   backend/data/               # yahoo fetcher, 24h cache, run_store
+  backend/data/fixtures/      # DEMO csv - offline paper series
   backend/tests/              # pytest (yahoo mocked)
   frontend/                   # react + vite
   frontend/src/               # one-screen desk ui
@@ -30,7 +31,9 @@ trading-strategy-backtester/
 
 Flask on :5050, Vite UI on :5173 (opens the browser). Port 5050 on purpose - macOS AirPlay often grabs 5000 and returns 403 through the vite proxy.
 
-Docker (api needs network for Yahoo):
+Offline (no Yahoo): pick ticker **DEMO** in the UI - it loads `backend/data/fixtures/demo_ohlcv.csv`. Real tickers still need network for Yahoo.
+
+Docker (api needs network for Yahoo unless you only run DEMO):
 
 ```bash
 docker compose up --build
@@ -80,7 +83,7 @@ flowchart LR
   UI -->|"GET /api/runs"| Store
 ```
 
-UI posts ticker / dates / strategy / costs. Flask hits a 24h SQLite cache or Yahoo, then the strategy stamps a `signal` column (`1 / -1 / 0`). The engine walks day by day (fills, fees, optional stop-loss / max-drawdown halt). Same signals are simulated twice - with your costs and with zero costs - so the UI can overlay both curves. Metrics and curves go back as JSON and into `backtest_runs.db`. Vite proxies `/api` to `:5050` in dev.
+UI posts ticker / dates / strategy / costs. Flask hits a 24h SQLite cache or Yahoo (or the DEMO fixture), then the strategy stamps a `signal` column (`1 / -1 / 0`). The engine walks day by day (fills, fees, optional stop-loss / max-drawdown halt). Same signals are simulated twice - with your costs and with zero costs - so the UI can overlay both curves. Metrics and curves go back as JSON and into `backtest_runs.db`. Vite proxies `/api` to `:5050` in dev.
 
 ## whats interesting
 
@@ -93,6 +96,7 @@ UI posts ticker / dates / strategy / costs. Flask hits a 24h SQLite cache or Yah
 - `ml_strategy.py` is only a facade - features, folds, and predict live in `backtester/walk_forward.py`
 - compare mode runs MA / RSI / ML under the same ticker, dates, and costs
 - run history in SQLite with desk notes, delete, and clear - single-user on purpose
+- **DEMO** ticker: committed fixture CSV so clone + demo works with no network
 
 ## limitations
 
@@ -103,6 +107,7 @@ UI posts ticker / dates / strategy / costs. Flask hits a 24h SQLite cache or Yah
 - ML is a toy classifier. walk-forward helps, it does not erase overfitting if you keep retuning on the same window
 - full-period Sharpe / return still include flat in-sample equity - use `oos_metrics` for the OOS slice
 - Yahoo is free delayed/adjusted history; column shape drifts and gaps happen (fetcher normalises MultiIndex / Adj Close)
+- DEMO is synthetic paper data for offline demos - not a real market series
 - SQLite for cache + history - fine for one person. not a multi-user production store
 
 ## tests
@@ -118,4 +123,6 @@ cd frontend && npm test && npm run build
 ./run.sh
 ```
 
-Or the manual quick start (API :5050, UI :5173).
+In the UI pick ticker **DEMO**, dates inside 2023-01 to 2024-08, strategy MA or RSI, then run. No Yahoo required for that path.
+
+Or the manual quick start (API :5050, UI :5173). Real tickers need network.

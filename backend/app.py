@@ -22,6 +22,7 @@ app = Flask(__name__)
 CORS(app)
 
 TICKERS = [
+    "demo",
     "aapl",
     "tsla",
     "msft",
